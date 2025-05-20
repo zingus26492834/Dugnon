@@ -7,7 +7,7 @@ last_block = None       # Tracks last dragged block
 # Class to create code blocks
 class CodeBlock(Button):    
     def __init__(self, texture, code, **kwargs):
-        super().__init__(texture = load_texture(texture), model = Quad(), scale = (0.2, 0.1), unlit = True, **kwargs)
+        super().__init__(texture = load_texture(texture), model = 'quad', scale = (0.2, 0.1), color = color.white, unlit = True, **kwargs)
         self.code = code
         self.dragging = False
         self.Active = False
