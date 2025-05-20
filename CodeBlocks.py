@@ -7,18 +7,20 @@ last_block = None       # Tracks last dragged block
 # Class to create code blocks
 class CodeBlock(Button):    
     def __init__(self, texture, code, **kwargs):
-        super().__init__(texture=texture, scale=(0.2, 0.1), color = color.rgb(1, 1, 1), **kwargs)
+        super().__init__(texture = load_texture(texture), model = Quad(), scale = (0.2, 0.1), unlit = True, **kwargs)
         self.code = code
         self.dragging = False
+        self.Active = False
         code_blocks.append(self)        # Adds code block to code_blocks list
 
     # Loop using Ursina's update function
     def update(self):
         global last_block       # Allows last_block to be used in this function
-        if self.dragging:
-            self.position = mouse.position      # Drags block with mouse
-        elif last_block == self:        # Makes sure only the last dragged block gets snapped
-            self.SnapToBlock()      # Snaps block if not being dragged
+        if self.Active:
+            if self.dragging:
+                self.position = mouse.position      # Drags block with mouse
+            elif last_block == self:        # Makes sure only the last dragged block gets snapped
+                self.SnapToBlock()      # Snaps block if not being dragged
 
     # Function to drag blocks
     def input(self, key):
@@ -40,6 +42,7 @@ class CodeBlock(Button):
                     offset = Vec2(block.scale.x, 0)      # Offsets block to snap to the right side
                     self.position = block.position + offset         # Snaps block
                     
+
 
 # Function to execute code blocks
 def execute(**kwargs):
