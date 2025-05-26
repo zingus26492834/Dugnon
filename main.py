@@ -7,31 +7,26 @@ camera.orthographic = True
 camera.position = (30/2,8)
 camera.fov = 16
 
-ifblock = CodeBlock('CodeBlocks/if.png', 'if ')
-cheese = CodeBlock('CodeBlocks/cheese.png', 'apple:\n    ')
-banana = CodeBlock('CodeBlocks/banana.png', 'print("Banana")')
-CurrentCodeBlocks = [ifblock, cheese, banana]
-
 CodeBlocksEnabled = False
-for c in CurrentCodeBlocks:
-    c.Active = False
-    c.visible = False
-
 def input(key):
     global CodeBlocksEnabled
     if key == 'space':
-        execute(apple=True)
+        execute()
     if key == 'k':
         CodeBlocksEnabled = not CodeBlocksEnabled
-        for c in CurrentCodeBlocks:
-            if CodeBlocksEnabled:
-                c.Active = True
-                c.visible = True
-            else:
-                c.Active = False
-                c.visible = False
+        ToggleCodeBlocks(CodeBlocksEnabled)
 
 make_level(load_texture('Levels/platformer_tutorial_level'))
 
 EditorCamera()
+def update():
+    for i in ItemCodeBlocks:
+        if player.intersects(i).hit and i.Active:
+            CreateCodeBlock(i.CBid)
+            i.Active = False
+            i.enabled = False
+    
+    if mouse.scroll.y != 0:
+        .scale += mouse.scroll.y * 0.1
+
 app.run()

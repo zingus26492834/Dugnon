@@ -1,0 +1,14 @@
+CodeBlocks/if.png, if 
+CodeBlocks/colon.png, :\n    
+CodeBlocks/True.png, True
+CodeBlocks/False.png, False
+CodeBlocks/banana.png, banana
+CodeBlocks/banana.png, banana
+CodeBlocks/cheese.png, print(
+CodeBlocks/closebracket.png, )
+CodeBlocks/openbracket.png, (
+CodeBlocks/smile.png, "Smiley Face"
+CodeBlocks/+.png,  + 
+CodeBlocks/1.png, 1
+CodeBlocks/space.png,  
+CodeBlocks/=.png, =
