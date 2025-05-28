@@ -4,7 +4,6 @@ from CodeBlocks import *
 
 
 player = PlatformerController2d(y=1, z=.01, scale_y=1, max_jumps=2)
-ground = Entity(model='quad', scale_x=10, collider='box', color=color.black)
 
 quad = load_model('quad', use_deepcopy=True)
 level_parent = Entity(model=Mesh(vertices=[], uvs=[]), texture='white_cube')
@@ -34,6 +33,6 @@ def make_level(texture):
                 player.position = player.start_position
             
             if col == color.red:
-                ItemCodeBlocks.append(GenerateCodeBlock(RandomCodeBlock(), x, y))
+                ItemCodeBlocks.append(GenerateCodeBlock(RandomCodeBlock(), (x + 0.5), (y + 0.5)))
 
     level_parent.model.generate()

@@ -8,25 +8,36 @@ camera.position = (30/2,8)
 camera.fov = 16
 
 CodeBlocksEnabled = False
+blocksdragging = False
+blockoffset = Vec3(0, 0, 0)
 def input(key):
-    global CodeBlocksEnabled
+    global CodeBlocksEnabled, blockoffset, blocksdragging
     if key == 'space':
         execute()
     if key == 'k':
         CodeBlocksEnabled = not CodeBlocksEnabled
         ToggleCodeBlocks(CodeBlocksEnabled)
+    if key == 'scroll up' and CodeBlocksEnabled:
+        scrollblock('up')
+    if key == 'scroll down' and CodeBlocksEnabled:
+        scrollblock('down')
+    if key == 'right mouse down' and CodeBlocksEnabled:
+        blocksdragging = True
+        mouselocalpos = cbpep.get_relative_point(camera.ui, mouse.position)
+        blockoffset = (mouselocalpos - cbpe.position)
+    if key == 'right mouse up' and CodeBlocksEnabled:
+        blocksdragging = False
 
 make_level(load_texture('Levels/platformer_tutorial_level'))
 
-EditorCamera()
 def update():
     for i in ItemCodeBlocks:
         if player.intersects(i).hit and i.Active:
             CreateCodeBlock(i.CBid)
             i.Active = False
             i.enabled = False
-    
-    if mouse.scroll.y != 0:
-        .scale += mouse.scroll.y * 0.1
+    if blocksdragging:
+        mouselocalpos = cbpep.get_relative_point(camera.ui, mouse.position)
+        cbpe.position = (mouselocalpos - blockoffset)
 
 app.run()

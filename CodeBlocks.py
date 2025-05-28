@@ -3,11 +3,13 @@ from ursina import *
 # Variables not specific to class
 code_blocks = []        # Empty list to store all code blocks
 last_block = None       # Tracks last dragged block
+cbpep = Entity(scale = 1, position = (0, 0), parent = camera.ui)    # Code Block Parent Entity Parent, for zooming codeblocks ui
+cbpe = Entity(scale = 1, position = (0, 0), parent = cbpep)         # Code Block Parent Entity, for moving all codeblocks as if panning
 
 # Class to create code blocks
 class CodeBlock(Button):    
     def __init__(self, texture, code, **kwargs):
-        super().__init__(model = 'quad', scale = (0.2, 0.1), color = color.white, unlit = True, **kwargs)
+        super().__init__(model = 'quad', scale = (0.2, 0.1), color = color.white, unlit = True, parent = cbpe, **kwargs)
         self.code = code
         self.texture = load_texture(texture)    # This has to be loaded after the model to properly be applied
         self.dragging = False
@@ -19,7 +21,8 @@ class CodeBlock(Button):
         global last_block       # Allows last_block to be used in this function
         if self.Active:
             if self.dragging:
-                self.position = mouse.position      # Drags block with mouse
+                mouselocalpos = cbpe.get_relative_point(camera.ui, mouse.position)
+                self.position = (mouselocalpos.x, mouselocalpos.y)      # Drags block with mouse
             elif last_block == self:        # Makes sure only the last dragged block gets snapped
                 self.SnapToBlock()      # Snaps block if not being dragged
 
@@ -87,7 +90,9 @@ def CodeBlocksList():
     AvailableCodeBlocks = []
     with open('CodeBlocks/CodeBlocksList.txt', 'r') as CBL:
         for line in CBL:
-            AvailableCodeBlocks.append(line.strip().split(',', 1))
+            strippedline = line.strip().split(',', 1)
+            strippedline[1] = strippedline[1].replace('\\n', '\n')
+            AvailableCodeBlocks.append(strippedline)
     return AvailableCodeBlocks
 
 def RandomCodeBlock():
@@ -95,7 +100,7 @@ def RandomCodeBlock():
     ACBCount = 0
     for CB in ACB:
         ACBCount += 1
-    return random.randint(0, ACBCount)
+    return random.randint(0, ACBCount - 1)
 
 def GenerateCodeBlock(CBid, CBx, CBy):
     ACB = CodeBlocksList()
@@ -121,4 +126,10 @@ def ToggleCodeBlocks(Active):
             c.visible = True
         else:
             c.Active = False
-            c.visible = False
+            c.visible = False\
+
+def scrollblock(direction):
+    if direction == 'up':
+        cbpep.scale = ((cbpep.scale.x * 1.1), (cbpep.scale.y * 1.1), 0.1)
+    elif direction =='down':
+        cbpep.scale = ((cbpep.scale.x * 0.9), (cbpep.scale.y * 0.9), 0.1)
