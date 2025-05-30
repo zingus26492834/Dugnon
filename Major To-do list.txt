@@ -1,0 +1,19 @@
+Major To-do list
+- Character sprites
+- Character Animations
+- Level designs
+- Level visual designs (and code for it)
+- projectiles
+- puzzles
+- enemies
+- fix collision with entities
+- level scroll code
+- level autogen code maybe
+- tutorial
+- sfx
+- bgm
+- vfx
+- title screen
+- lose screen
+- high scores
+- bosses?

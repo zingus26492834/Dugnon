@@ -9,7 +9,12 @@ cbpe = Entity(scale = 1, position = (0, 0), parent = cbpep)         # Code Block
 # Class to create code blocks
 class CodeBlock(Button):    
     def __init__(self, texture, code, **kwargs):
-        super().__init__(model = 'quad', scale = (0.2, 0.1), color = color.white, unlit = True, parent = cbpe, **kwargs)
+        super().__init__(model = 'quad', 
+                         scale = (0.2, 0.1), 
+                         color = color.white, 
+                         unlit = True, 
+                         parent = cbpe, 
+                         **kwargs)
         self.code = code
         self.texture = load_texture(texture)    # This has to be loaded after the model to properly be applied
         self.dragging = False
@@ -105,7 +110,15 @@ def RandomCodeBlock():
 def GenerateCodeBlock(CBid, CBx, CBy):
     ACB = CodeBlocksList()
     CBInfo = ACB[CBid]
-    codeblockitem = Entity(model = 'quad', collider = 'box', unlit = True, position = (CBx, CBy, 0.1), scale = (2, 1, 1), CBid = CBid, Active = True)
+    codeblockitem = Entity(model = 'quad', 
+                           unlit = True, 
+                           position = (CBx, CBy, 0.1), 
+                           scale = (2, 1, 1), 
+                           CBid = CBid, 
+                           Active = True)
+    codeblockitem.collider = BoxCollider(codeblockitem, 
+                                         center = Vec3(0, 0, 0), 
+                                         size = (1.2, 1.6, 1))
     codeblockitem.texture = load_texture(CBInfo[0])
     return codeblockitem
 

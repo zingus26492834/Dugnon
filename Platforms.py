@@ -1,17 +1,12 @@
 from ursina import *
-from ursina.prefabs.platformer_controller_2d import PlatformerController2d
 from CodeBlocks import *
-
-
-player = PlatformerController2d(y=1, z=.01, scale_y=1, max_jumps=2)
+from Player import *
 
 quad = load_model('quad', use_deepcopy=True)
 level_parent = Entity(model=Mesh(vertices=[], uvs=[]), texture='white_cube')
 ItemCodeBlocks = []
 
 def make_level(texture):
-    [destroy(c) for c in level_parent.children]
-
     for y in range(texture.height):
         collider = None
         for x in range(texture.width):
@@ -22,7 +17,12 @@ def make_level(texture):
                 level_parent.model.vertices += [Vec3(*e) + Vec3(x+.5,y+.5,0) for e in quad.generated_vertices]
                 level_parent.model.uvs += quad.uvs
                 if not collider:
-                    collider = Entity(parent=level_parent, position=(x,y), model='cube', origin=(-.5,-.5), collider='box', visible=False)
+                    collider = Entity(parent=level_parent, 
+                                      position=(x,y), 
+                                      model='cube', 
+                                      origin=(-.5,-.5), 
+                                      collider='box', 
+                                      visible=False)
                 else:
                     collider.scale_x += 1
             else:
