@@ -52,7 +52,7 @@ class CodeBlock(Button):
 
 
 # Function to execute code blocks
-def execute(**kwargs):
+def execute(key = None, **kwargs):
         blockgroups = []
         sortedblocks = set()
 
@@ -86,7 +86,7 @@ def execute(**kwargs):
                 executedcode = ''.join([block.code for block in group])     # Joins code to be functional (if blocks are correctly ordered)
                 print(executedcode)     # Displays code that will be executed
                 try:        # Prevents crashing if code is incorrect
-                    exec(executedcode, {}, kwargs)      # Executes code, adding kwargs from function
+                    exec(executedcode, {'key': key, **globals}, kwargs)      # Executes code, adding kwargs from function
                 except Exception as e:
                     print(f"Error: {e}")        # Displays what went wrong if code is incorrect
 
@@ -95,8 +95,12 @@ def CodeBlocksList():
     AvailableCodeBlocks = []
     with open('CodeBlocks/CodeBlocksList.txt', 'r') as CBL:
         for line in CBL:
-            strippedline = line.strip().split(',', 1)
-            strippedline[1] = strippedline[1].replace('\\n', '\n')
+            line = line.rstrip('\n')
+            if '|' in line:
+                line = line.strip().split('|', 1)[0]
+            strippedline = line.split(',', 1)
+            if len(strippedline) > 1:
+                strippedline[1] = strippedline[1].replace('\\n', '\n')
             AvailableCodeBlocks.append(strippedline)
     return AvailableCodeBlocks
 
@@ -115,7 +119,8 @@ def GenerateCodeBlock(CBid, CBx, CBy):
                            position = (CBx, CBy, 0.1), 
                            scale = (2, 1, 1), 
                            CBid = CBid, 
-                           Active = True)
+                           Active = True, 
+                           playercollision = False)
     codeblockitem.collider = BoxCollider(codeblockitem, 
                                          center = Vec3(0, 0, 0), 
                                          size = (1.2, 1.6, 1))
@@ -139,7 +144,7 @@ def ToggleCodeBlocks(Active):
             c.visible = True
         else:
             c.Active = False
-            c.visible = False\
+            c.visible = False
 
 def scrollblock(direction):
     if direction == 'up':
