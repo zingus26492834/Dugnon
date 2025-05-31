@@ -143,8 +143,6 @@ def update():
             CameraEdges = GetCameraEdges()
             player.gravity = 1
             incrementchunk = False
-    if executing:
-        execute()
 
 CreateCodeBlock(15)
 CreateCodeBlock(13)

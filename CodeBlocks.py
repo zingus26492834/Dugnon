@@ -1,4 +1,6 @@
 from ursina import *
+from CodeFunctions import *
+from Player import player
 
 # Variables not specific to class
 code_blocks = []        # Empty list to store all code blocks
@@ -50,7 +52,7 @@ class CodeBlock(Button):
                     self.position = block.position + snappos         # Snaps block
                     
 
-
+ExecutedEntities = []
 # Function to execute code blocks
 def execute(key = None, **kwargs):
         blockgroups = []
@@ -86,7 +88,7 @@ def execute(key = None, **kwargs):
                 executedcode = ''.join([block.code for block in group])     # Joins code to be functional (if blocks are correctly ordered)
                 print(executedcode)     # Displays code that will be executed
                 try:        # Prevents crashing if code is incorrect
-                    exec(executedcode, {'key': key, **globals}, kwargs)      # Executes code, adding kwargs from function
+                    exec(executedcode, {**globals(), 'key': key,  'FireableBlock' : FireableBlock, 'player': player, **kwargs})      # Executes code, adding kwargs from function
                 except Exception as e:
                     print(f"Error: {e}")        # Displays what went wrong if code is incorrect
 
