@@ -4,7 +4,7 @@ from CodeBlocks import *
 class Player(Entity):
     def __init__(self, **kwargs):
         super().__init__(model = 'quad', 
-                         texture = load_texture('brick'),
+                         texture = load_texture('Sprites/PlayerTemp'),
                          scale = (1,1,1),
                          collider = 'box'
                          )
@@ -32,16 +32,17 @@ class Player(Entity):
     def update(self):
         self.ignore_list = [self] + [e for e in scene.entities if hasattr(e, 'playercollision')]        # Updates ignore list to include entities made after the player, and ignores entities that have playercollision attribute
         if not boxcast(
-            self.position+Vec3(self.velocity * time.dt * self.speed, 0, 0),
-            direction=Vec3(self.velocity,0,0),
-            distance=abs(self.scale_x/2),
+            self.position,
+            direction=Vec3(self.velocity,self.scale_y / 2,0),
+            distance=abs(self.scale_x / 2),
             ignore=self.ignore_list,
             traverse_target=self.traverse_target,
-            thickness=(self.scale_x*.99, self.scale_y*.9)
-            ).hit:
+            thickness=(self.scale_x*.99, self.scale_y*.9), debug = True).hit:
 
             self.x += self.velocity * time.dt * self.speed
         
+
+
         self.walking = held_keys['a'] + held_keys['d'] > 0 and self.grounded
 
         ray_origin = self.world_position - Vec3(0, self.scale_y / 2, 0)
@@ -59,14 +60,15 @@ class Player(Entity):
         
         if not self.grounded and not self.jumping:
             self.y -= min(self.air_time * self.gravity, ray.distance - 0.1)
-            self.air_time += time.dt * 4 * self.gravity
+            self.air_time += time.dt * 4 * self.gravity    
 
         if self.jumping:
-            hit_above = raycast(self.world_position+Vec3(0,self.scale_y/2,0), self.up, distance=0.2, traverse_target=self.traverse_target, ignore=self.ignore_list)
-            hit_above_left = raycast(self.world_position+Vec3(-self.scale_x*.49,self.scale_y/2,0), self.up, distance=0.2, traverse_target=self.traverse_target, ignore=self.ignore_list)
-            hit_above_right = raycast(self.world_position+Vec3(self.scale_x*.49,self.scale_y/2,0), self.up, distance=0.2, traverse_target=self.traverse_target, ignore=self.ignore_list)
+            jumprayorigin = raycast(self.world_position + Vec3(self.scale_x / 2, self.scale_y / 2))
+            hit_above = raycast(self.world_position+Vec3(0,self.scale_y/2,0), self.up, distance=0.2, traverse_target=self.traverse_target, ignore=self.ignore_list, debug = True)
+            hit_above_left = raycast(self.world_position+Vec3(-self.scale_x*.49,self.scale_y/2,0), self.up, distance=0.2, traverse_target=self.traverse_target, ignore=self.ignore_list, debug = True)
+            hit_above_right = raycast(self.world_position+Vec3(self.scale_x*.49,self.scale_y/2,0), self.up, distance=0.2, traverse_target=self.traverse_target, ignore=self.ignore_list, debug = True)
             if any((hit_above.hit, hit_above_left.hit, hit_above_right.hit)):
-                self.target_y = min(min((r.world_point.y for r in (hit_above, hit_above_left, hit_above_right) if r.hit)), self.y)
+                self.y = min(min((r.world_point.y for r in (hit_above, hit_above_left, hit_above_right) if r.hit)), self.y)
                 if hasattr(self, 'y_animator'):
                     self.y_animator.kill()
                 self.air_time = 0

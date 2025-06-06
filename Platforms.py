@@ -6,6 +6,7 @@ quad = load_model('quad', use_deepcopy=True)
 level_parent = Entity(model=Mesh(vertices=[], uvs=[]), texture='white_cube')
 ItemCodeBlocks = []
 loaded_chunks = {}
+LockedDoors = []
 
 def make_level(texture, offset_x, offset_y, chunkx, chunky):
     for y in range(texture.height):
@@ -37,6 +38,9 @@ def make_level(texture, offset_x, offset_y, chunkx, chunky):
             
             if col == color.red:
                 ItemCodeBlocks.append(GenerateCodeBlock(RandomCodeBlock(), (world_x + 0.5), (world_y + 0.5)))
+            
+            if col == color.blue:
+                 LockedDoors.append(CreateLockedDoor(world_x, world_y))
 
             entrances = GetEntrances(texture.name)
             loaded_chunks[(chunkx, chunky)] = entrances
@@ -108,8 +112,11 @@ def RandomLevel(direction, x, y, chunkx, chunky):
     FilteredLevels = []
     for Level in AvailableLevels:
          entrances = GetEntrances(Level)
-         if required_direction.issubset(entrances) and not forbidden_directions.isdisjoint(entrances):
+         if required_direction.issubset(entrances) and forbidden_directions.isdisjoint(entrances):
              FilteredLevels.append(Level)
+    
+    if not FilteredLevels:
+         FilteredLevels = AvailableLevels
 
     RandomLevel = random.choice(FilteredLevels)
     return make_level(load_texture(RandomLevel), x, y, chunkx, chunky)
@@ -125,3 +132,11 @@ def GetEntrances(Level):
      if Level in RightLevels:  
          entrances.add('right')
      return entrances
+
+def CreateLockedDoor(x, y):
+     LockedDoor = Entity(position = (x, y + 4),
+                         model = 'quad',
+                         collider = 'box',
+                         texture = load_texture('brick'),
+                         scale = (1, 8, 1))
+     return LockedDoor

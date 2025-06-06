@@ -6,9 +6,7 @@ Major To-do list
 - projectiles
 - puzzles
 - enemies
-- fix collision with entities
-- level scroll code
-- level autogen code maybe
+- fix collision with ceilings
 - tutorial
 - sfx
 - bgm

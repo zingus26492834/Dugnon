@@ -57,6 +57,12 @@ ExecutedEntities = []
 def execute(key = None, **kwargs):
         blockgroups = []
         sortedblocks = set()
+        ExecuteArgs = {**globals(),
+                'key' : key, 
+                'FireableBlock' : FireableBlock,
+                'FireableFire' : FireableFire,
+                'FireableKey' : FireableKey,
+                'player' : player}
 
         # Groups code blocks that are snapped together
         def creategroups(startblock, group):
@@ -88,7 +94,7 @@ def execute(key = None, **kwargs):
                 executedcode = ''.join([block.code for block in group])     # Joins code to be functional (if blocks are correctly ordered)
                 print(executedcode)     # Displays code that will be executed
                 try:        # Prevents crashing if code is incorrect
-                    exec(executedcode, {**globals(), 'key': key,  'FireableBlock' : FireableBlock, 'player': player, **kwargs})      # Executes code, adding kwargs from function
+                    exec(executedcode, ExecuteArgs, **kwargs)      # Executes code, adding kwargs from function
                 except Exception as e:
                     print(f"Error: {e}")        # Displays what went wrong if code is incorrect
 
@@ -135,6 +141,9 @@ def CreateCodeBlock(CBid):
     CBList = CodeBlocksList()
     texture, code = CBList[CBid]
     CreatedCodeBlock = CodeBlock(texture, code, visible = False)
+    for c in CurrentCodeBlocks:
+        if CreatedCodeBlock.intersects(c):
+            CreatedCodeBlock.x += .2
     CurrentCodeBlocks.append(CreatedCodeBlock)
     return CreatedCodeBlock
 

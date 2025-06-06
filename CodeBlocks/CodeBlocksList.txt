@@ -16,3 +16,6 @@ CodeBlocks/divide.png,/|
 CodeBlocks/EKey.png,key == 'e'|
 CodeBlocks/Fkey.png,key == 'f'|
 CodeBlocks/make.png,'make'))|
+CodeBlocks/fire.png,ExecutedEntities.append(FireableFire(|
+CodeBlocks/Key.png,ExecutedEntities.append(FireableKey(|
+CodeBlocks/shoot.png,'shoot'))|
