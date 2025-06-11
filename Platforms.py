@@ -8,7 +8,7 @@ ItemCodeBlocks = []
 loaded_chunks = {}
 LockedDoors = []
 
-def make_level(texture, offset_x, offset_y, chunkx, chunky):
+def make_level(texture, offset_x, offset_y, chunkx, chunky, randomdoors = True):
     for y in range(texture.height):
         collider = None
         for x in range(texture.width):
@@ -40,7 +40,10 @@ def make_level(texture, offset_x, offset_y, chunkx, chunky):
                 ItemCodeBlocks.append(GenerateCodeBlock(RandomCodeBlock(), (world_x + 0.5), (world_y + 0.5)))
             
             if col == color.blue:
-                 LockedDoors.append(CreateLockedDoor(world_x, world_y))
+                 if x > (texture.width / 2) + 5 or x < (texture.width / 2) - 5:
+                    CreateLockedDoorV(world_x, world_y, randomdoors)
+                 elif y > (texture.height / 2) + 5 or y < (texture.height / 2) - 5:
+                    CreateLockedDoorH(world_x, world_y, randomdoors)
 
             entrances = GetEntrances(texture.name)
             loaded_chunks[(chunkx, chunky)] = entrances
@@ -133,10 +136,38 @@ def GetEntrances(Level):
          entrances.add('right')
      return entrances
 
-def CreateLockedDoor(x, y):
-     LockedDoor = Entity(position = (x, y + 4),
-                         model = 'quad',
-                         collider = 'box',
-                         texture = load_texture('brick'),
-                         scale = (1, 8, 1))
-     return LockedDoor
+def CreateLockedDoorV(x, y, randomchance, colour = 'regular'):
+     if random.randint(1, 20) == 1 and randomchance:
+          LockedDoor = Entity(position = (x + 0.5, y + 4),
+                              model = 'quad',
+                              collider = 'box',
+                              texture = load_texture('brick'),
+                              scale = (1, 8, 1),
+                              colour = colour)
+          LockedDoors.append(LockedDoor)
+     elif not randomchance:
+          LockedDoor = Entity(position = (x + 0.5, y + 4),
+                              model = 'quad',
+                              collider = 'box',
+                              texture = load_texture('brick'),
+                              scale = (1, 8, 1),
+                              colour = colour)
+          LockedDoors.append(LockedDoor)
+
+def CreateLockedDoorH(x, y, randomchance, colour = 'regular'):
+     if random.randint(1, 20) == 1 and randomchance:
+          LockedDoor = Entity(position = (x + 4, y + 0.5),
+                              model = 'quad',
+                              collider = 'box',
+                              texture = load_texture('brick'),
+                              scale = (8, 1, 1),
+                              colour = colour)
+          LockedDoors.append(LockedDoor)
+     elif not randomchance:
+          LockedDoor = Entity(position = (x + 4, y + 0.5),
+                              model = 'quad',
+                              collider = 'box',
+                              texture = load_texture('brick'),
+                              scale = (8, 1, 1),
+                              colour = colour)
+          LockedDoors.append(LockedDoor)

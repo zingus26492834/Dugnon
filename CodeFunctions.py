@@ -11,6 +11,7 @@ def FireableBlock(modification, **kwargs):
                 collider='box', 
                 visible=True,
                 texture=load_texture('brick'),
+                spawntime = time.time(),
                 **extraargs)
         ExistingBlocks.append(Block)
         return Block
@@ -58,7 +59,7 @@ def FireableFire(modification, **kwargs):
         return Fire
 
 ExistingKeys = []
-def FireableKey(modification, **kwargs):
+def FireableKey(modification, colour = 'regular', **kwargs):
     if modification == 'make':
         Key = Entity(position = (player.x + 1, player.y),
                      playercollision = False,
@@ -67,7 +68,8 @@ def FireableKey(modification, **kwargs):
                      collider = 'box',
                      scale = (1, 1, 1),
                      texture = load_texture('Sprites/Key.png'),
-                     spawntime = time.time())
+                     spawntime = time.time(),
+                     colour = colour)
         ExistingKeys.append(Key)
         return Key
     if modification == 'shoot':
@@ -80,7 +82,8 @@ def FireableKey(modification, **kwargs):
                      texture = load_texture('Sprites/Key.png'),
                      spawntime = time.time(),
                      shooting = True,
-                     speed = 10)
+                     speed = 10,
+                     colour = colour)
         ExistingKeys.append(Key)
         return Key
         

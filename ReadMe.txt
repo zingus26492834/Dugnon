@@ -7,8 +7,8 @@ imageio 2.37.0
 
 Known Bugs
 ================================
-- Spamming space in a short gap under a ceiling can cause player to clip through
-- Temp solution: If player hasn't gone out of bounds press O to reset position
+- Very rarely player can get stuck inside objects
+- Solution: spam w a d, should get you unstuck if you really can't move (eventually)
 
-- Pressing O during screen transition breaks the camera
-- Solution: It's a debug key don't use it if you don't have to
+- Screen transition breaking
+- Solution: None, pretty sure it only happens if you are already breaking the game somehow

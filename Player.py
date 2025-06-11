@@ -20,6 +20,12 @@ class Player(Entity):
         self.air_time = 0
         self.animator = Animator({'idle' : None, 'walk' : None, 'jump' : None})
         self.ignore_list = [self]
+        self.jumpcooldown = 0
+        self.stuckcheck = time.time() + 5
+        self.aescape = 0
+        self.descape = 0
+        self.spaceescape = 0
+        self.stuckpos = 0
 
         ray = raycast(self.world_position, 
                       self.down, 
@@ -37,11 +43,9 @@ class Player(Entity):
             distance=abs(self.scale_x / 2),
             ignore=self.ignore_list,
             traverse_target=self.traverse_target,
-            thickness=(self.scale_x*.99, self.scale_y*.9), debug = True).hit:
+            thickness=(self.scale_x*.99, self.scale_y*.9)).hit:
 
             self.x += self.velocity * time.dt * self.speed
-        
-
 
         self.walking = held_keys['a'] + held_keys['d'] > 0 and self.grounded
 
@@ -62,25 +66,37 @@ class Player(Entity):
             self.y -= min(self.air_time * self.gravity, ray.distance - 0.1)
             self.air_time += time.dt * 4 * self.gravity    
 
-        if self.jumping:
-            jumprayorigin = raycast(self.world_position + Vec3(self.scale_x / 2, self.scale_y / 2))
-            hit_above = raycast(self.world_position+Vec3(0,self.scale_y/2,0), self.up, distance=0.2, traverse_target=self.traverse_target, ignore=self.ignore_list, debug = True)
-            hit_above_left = raycast(self.world_position+Vec3(-self.scale_x*.49,self.scale_y/2,0), self.up, distance=0.2, traverse_target=self.traverse_target, ignore=self.ignore_list, debug = True)
-            hit_above_right = raycast(self.world_position+Vec3(self.scale_x*.49,self.scale_y/2,0), self.up, distance=0.2, traverse_target=self.traverse_target, ignore=self.ignore_list, debug = True)
-            if any((hit_above.hit, hit_above_left.hit, hit_above_right.hit)):
+        hit_above = raycast(self.world_position+Vec3(0,(self.scale_y/2)-0.5,0), self.up, distance=0.8, traverse_target=self.traverse_target, ignore=self.ignore_list)
+        hit_above_left = raycast(self.world_position+Vec3(-self.scale_x*.49,(self.scale_y/2)-0.5,0), self.up, distance=0.8, traverse_target=self.traverse_target, ignore=self.ignore_list)
+        hit_above_right = raycast(self.world_position+Vec3(self.scale_x*.49,(self.scale_y/2)-0.5,0), self.up, distance=0.8, traverse_target=self.traverse_target, ignore=self.ignore_list)
+        if any((hit_above.hit, hit_above_left.hit, hit_above_right.hit)):
+             if self.jumping:
                 self.y = min(min((r.world_point.y for r in (hit_above, hit_above_left, hit_above_right) if r.hit)), self.y)
-                if hasattr(self, 'y_animator'):
-                    self.y_animator.kill()
-                self.air_time = 0
                 self.jumping = False
+                self.air_time = 0
+             if hasattr(self, 'y_animator'):
+                 self.y_animator.kill()
+        
+        if self.stuckcheck <= time.time():
+            self.stuckcheck += 5
+            self.stuckpos = self.position
+            self.aescape = 0
+            self.descape = 0
+            self.spaceescape = 0
 
     def input(self, key):
         if key == 'space':
             self.jump()
+            self.spaceescape += 1
+        elif key == 'w':
+            self.jump()
+            self.spaceescape += 1
         if key == 'a':
             self.velocity = -1
+            self.aescape += 1
         if key == 'd':
             self.velocity = 1
+            self.descape += 1
         if key == 'a up':
             self.velocity = held_keys['d']
         if key == 'd up':
@@ -89,7 +105,11 @@ class Player(Entity):
     def jump(self):
         if not self.grounded:
             return
+        if self.jumpcooldown > time.time():
+            return
         
+        self.jumpcooldown = time.time() + 1
+
         self.jumping = True
         self.grounded = False
 

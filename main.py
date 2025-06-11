@@ -72,14 +72,18 @@ def input(key):
         TutorialGuyConvo2.start_conversation(TutorialGuy2)      # Begin tutorial conversation
         Tutorial2 = False       # Ends second part of the tutorial
         Tutorial3 = True        # Begins third part of the tutorial
-        TutorialGuy.position = (20, 8.5, 0)     # Moves TutorialGuy to the second position
+        TutorialGuy.position = (19.5, 7.5, 0)     # Moves TutorialGuy to the second position
 
 ################################################################################
 
 # Update loop handled by Ursina automatically
 chunkx = 0
 chunky = 0
+Tutorial = True
 incrementchunk = False
+keynotification = False
+keycolour = 'regular'
+keymessage = Text(text = f'You need a {keycolour} key to open this door', origin = (0, -3), scale = 2, visible = False, parent = camera.ui)
 # Update Function, runs every tick
 def update():
     global CameraEdges, chunkx, chunky, incrementchunk, executing
@@ -102,6 +106,7 @@ def update():
 
     # Check every edge, create new levels, and screen transitions handling
     # Right edge
+    global Tutorial5, Tutorial6, Tutorial7
     if player.position.x >= cright_edge:        # If player moves beyond the right side of the screen
         newcamerapos = cright_edge + width      # New camera position is 1 screen to the right
         player.velocity = 0     # Stops the player's horizonal movement
@@ -122,6 +127,18 @@ def update():
             CameraEdges = GetCameraEdges()      # Checks new Camera Edges
             player.gravity = 1      # Reenables gravity for the player
             incrementchunk = False      # Sets up for next chunk to be loaded
+            if Tutorial5:
+                TutorialGuyConvo5.enabled = True
+                TutorialGuyConvo5.start_conversation(TutorialGuy5)
+                Tutorial5 = False
+                Tutorial6 = True
+                TutorialGuy.position = (49, 1.5)
+            elif Tutorial6:
+                TutorialGuyConvo6.enabled = True
+                TutorialGuyConvo6.start_conversation(TutorialGuy6)
+                Tutorial6 = False
+                Tutorial7 = True
+                TutorialGuy.position = (58, 1.5)
 
     # Top edge
     if player.position.y >= ctop_edge:       # If player moves above the top of the screen
@@ -144,6 +161,11 @@ def update():
             CameraEdges = GetCameraEdges()      # Checks new Camera Edges
             player.gravity = 1      # Reenables gravity for the player
             incrementchunk = False      # Sets up for next chunk to be loaded
+            if Tutorial7:
+                TutorialGuyConvo7.enabled = True
+                TutorialGuyConvo7.start_conversation(TutorialGuy7)
+                Tutorial7 = False
+                TutorialGuy.enabled = False
 
     # Left edge
     if player.position.x <= cleft_edge:     # If player moves beyond the left side of the screen
@@ -188,8 +210,13 @@ def update():
             player.gravity = 1      # Reenables gravity for the player
             incrementchunk = False      # Sets up for next chunk to be loaded
 
+    # Unstuck player if spam a w d
+    if player.spaceescape >= 5 and player.aescape >= 5 and player.descape >= 5 and player.position == player.stuckpos:
+            player.x += 1
+            player.y += 1
+
     # Locked Doors
-    global Tutorial4
+    global Tutorial4, keycolour, starttime, keynotification
     for L in LockedDoors:       # Checks every Locked Door
         for K in ExistingKeys:      # Checks every Key
             # If door and key intersect, remove both
@@ -201,7 +228,22 @@ def update():
                     TutorialGuyConvo4.enabled = True
                     TutorialGuyConvo4.start_conversation(TutorialGuy4)
                     Tutorial4 = False
-                    TutorialGuy.enabled = False
+                    Tutorial5 = True
+        if L.intersects(player):
+            keynotification = True
+            starttime = time.time()
+            keycolour = L.colour
+
+    if keynotification:
+        keymessage.visible = True
+        if keycolour is not 'regular':
+            keymessage.color = getattr(color, keycolour)
+        else:
+            keymessage.color = color.yellow
+        keymessage.text = f'You need a {keycolour} key to open this door'
+        if time.time() - starttime > 3:
+            keymessage.visible = False
+            keynotification = False
     
     # CodeFunctions
     currenttime = time.time()       # Necessary to create a variable with this value rather than just calling time.time()
@@ -218,6 +260,12 @@ def update():
             # Also end the loop and stop movement after half a second if no collision
             elif currenttime - b.spawntime > 0.5:
                 delattr(b, 'shooting')
+            if currenttime - b.spawntime > 5.5:
+                b.enabled = False
+                ExistingBlocks.remove(b)
+        elif currenttime - b.spawntime > 5:
+            b.enabled = False
+            ExistingBlocks.remove(b)
     for f in ExistingFire:      # Checks every fire entity from CodeFunctions.py
         # Delete the fire after 2 seconds
         if currenttime - f.spawntime > 2:
@@ -255,6 +303,7 @@ def update():
     if executing:
         input(None)
     
+    
 ################################################################################
 
 # Tutorial
@@ -278,15 +327,24 @@ Tutorial1 = True
 Tutorial2 = False
 Tutorial3 = False
 Tutorial4 = False
-TutorialGuyConvo1 = Conversation(variables_object = Empty())        # Creates an object handled by an Ursina prefab to handle conversations
+Tutorial5 = False
+Tutorial6 = False
+Tutorial7 = False
+TutorialGuyConvo1 = Conversation()        # Creates an object handled by an Ursina prefab to handle conversations
 TutorialGuyConvo1.enabled = False       # Conversation template appears on game start otherwise
-TutorialGuyConvo2 = Conversation(variables_object = Empty())        # Theoretically I should only need 1 conversation object for all conversations, but in practice that's not how it works
+TutorialGuyConvo2 = Conversation()        # Theoretically I should only need 1 conversation object for all conversations, but in practice that's not how it works
 TutorialGuyConvo2.enabled = False
-TutorialGuyConvo3 = Conversation(variables_object = Empty())
+TutorialGuyConvo3 = Conversation()
 TutorialGuyConvo3.enabled = False
-TutorialGuyConvo4 = Conversation(variables_object = Empty())
+TutorialGuyConvo4 = Conversation()
 TutorialGuyConvo4.enabled = False
-TutorialGuy = Entity(position = (16, 2.5, 0),
+TutorialGuyConvo5 = Conversation()
+TutorialGuyConvo5.enabled = False
+TutorialGuyConvo6 = Conversation()
+TutorialGuyConvo6.enabled = False
+TutorialGuyConvo7 = Conversation()
+TutorialGuyConvo7.enabled = False
+TutorialGuy = Entity(position = (15, 1.5, 0),
                      model = 'quad',
                      collider = 'box',
                      scale = (1, 1, 1),
@@ -304,9 +362,10 @@ TutorialGuy2 = dedent('''
                          Right now you have a "Snippet" that creates a key when you press E.
                          Try replacing the "key" block with the "block" block.
                          Remember, the CodeBlocks will snap into a snippet in order of the last dropped block.
-                         This means you have to move the "make" block as well,
-                         otherwise the "block" block will snap to the other side of the "make" block.
-                         Once your done, press Q to start running your CodeBlocks.
+                         This means in the future you may have to move the "make" block as well,
+                         otherwise the "block" block would snap to the other side of the "make" block.
+                         For now you shouldn't have to move it.
+                         Once you're done, press Q to start running your CodeBlocks.
                          I will meet you again at the top of this wall.
                          ''')
 TutorialGuy3 = dedent('''
@@ -317,12 +376,51 @@ TutorialGuy3 = dedent('''
                         ''')
 TutorialGuy4 = dedent('''
                          Great job!
-                         I will leave you now.
-                         Good luck.
+                         Now on to the next room.
+                      ''')
+TutorialGuy5 = dedent('''
+                         Uh oh!
+                         You can't unlock some of these doors!
+                         You may have to come back later if you want to unlock horizontal doors.
+                         You will need some way for the key to be moved or placed downward.
+                         Additionally, some doors are different colours,
+                         this means they need different coloured keys to open them.
+                         For now you can only move to the right.
+                         Be sure to pick up that CodeBlock on your way through as well!
+                      ''')
+TutorialGuy6 = dedent('''
+                         Another horizontal door!
+                         The only path is up.
+                         See those CodeBlocks on the ground?
+                         Rather than moving the "block" and "key" blocks around,
+                         try making a new snippet with these CodeBlocks to move on to the next screen.
+                         You can use the pre-generated snippet as a template if you want.
+                      ''')
+TutorialGuy7 = dedent('''
+                         Great job!
+                         I'll leave you alone now.
+                         Goodbye!
                       ''')
 
-# Start game
-make_level(load_texture('Levels/platformer_tutorial_level'), 2, 0, 0, 0)        # Creates the tutorial level / starting room
+# Start game / Load tutorial levels, load tutorial codeblock items
+make_level(load_texture('Levels/platformer_tutorial_level'), 2, 0, 0, 0, randomdoors = False)        # Creates the tutorial level / starting room
 player.y += 2       # Makes sure the player doesn't get stuck in the ground
-CameraEdges = GetCameraEdges()      # Finds edges of the starting
+CameraEdges = GetCameraEdges()      # Finds edges of the starting screen
+cright_edge, ctop_edge, cleft_edge, cbottom_edge = CameraEdges
+# Make first 3 levels after start room non random
+make_level(load_texture('Levels/intersection'), cright_edge, cbottom_edge, 1, 0, randomdoors = False)
+make_level(load_texture('Levels/trisection4'), cright_edge + width, cbottom_edge, 2, 0, randomdoors = False)
+make_level(load_texture('Levels/trisection1'), cright_edge + width, ctop_edge, 2, 1)
+# Generate extra codeblock items for tutorial
+ItemCodeBlocks.append(GenerateCodeBlock(0, 62, 1.5))
+ItemCodeBlocks.append(GenerateCodeBlock(16, 64, 1.5))
+ItemCodeBlocks.append(GenerateCodeBlock(1, 66, 1.5))
+ItemCodeBlocks.append(GenerateCodeBlock(17, 70, 1.5))
+# Tell platforms code the tutorial levels already exist and don't need to be created again
+CheckChunk(0, 0)
+CheckChunk(1, 0)
+CheckChunk(2, 0)
+CheckChunk(2, 1)
+
+
 app.run()      # Starts the game
