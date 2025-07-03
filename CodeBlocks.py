@@ -1,9 +1,11 @@
 from ursina import *
 from CodeFunctions import *
 from Player import player
+from Tutorial import *
 
 # Variables not specific to class
 code_blocks = []        # Empty list to store all code blocks
+ItemCodeBlocks = []
 last_block = None       # Tracks last dragged block
 cbpep = Entity(scale = 1, position = (0, 0), parent = camera.ui)    # Code Block Parent Entity Parent, for zooming codeblocks ui
 cbpe = Entity(scale = 1, position = (0, 0), parent = cbpep)         # Code Block Parent Entity, for moving all codeblocks as if panning
@@ -35,6 +37,10 @@ class CodeBlock(Button):
 
     # Function to drag blocks
     def input(self, key):
+        if TutorialGuy.IsSpeaking:
+            return
+        if not self.enabled:
+            return
         global last_block       # Allows last_block to be used in this function
         if self.hovered and key == 'left mouse down':       # Checks if mouse if being clicked while over block
             self.dragging = True
@@ -127,7 +133,8 @@ def GenerateCodeBlock(CBid, CBx, CBy):
                            position = (CBx, CBy, 0.1), 
                            scale = (2, 1, 1), 
                            CBid = CBid, 
-                           Active = True, 
+                           Active = True,
+                           despawnable = True, 
                            playercollision = False)
     codeblockitem.collider = BoxCollider(codeblockitem, 
                                          center = Vec3(0, 0, 0), 
@@ -143,7 +150,7 @@ def CreateCodeBlock(CBid):
     CreatedCodeBlock = CodeBlock(texture, code, visible = False)
     for c in CurrentCodeBlocks:
         if CreatedCodeBlock.intersects(c):
-            CreatedCodeBlock.x += .2
+            CreatedCodeBlock.x += 0.2
     CurrentCodeBlocks.append(CreatedCodeBlock)
     return CreatedCodeBlock
 
@@ -156,9 +163,58 @@ def ToggleCodeBlocks(Active):
         else:
             c.Active = False
             c.visible = False
+            CodeBlocksGuide.visible = False
+
+RareCodeBlocks = []
+with open('CodeBlocks/RareCodeBlocksList.txt', 'r') as RCBL:
+    for line in RCBL:
+        line = line.rstrip('\n')
+        if '|' in line:
+            line = line.strip().split('|', 1)[0]
+        strippedline = line.split(',', 1)
+        if len(strippedline) > 1:
+            strippedline[1] = strippedline[1].replace('\\n', '\n')
+        RareCodeBlocks.append(strippedline)
+            
+def RandomRareCodeBlock():
+    global RareCodeBlocks
+    RCBCount = 0
+    for CB in RareCodeBlocks:
+        RCBCount += 1
+    return random.randint(0, RCBCount - 1)
+
+def GenerateRareCodeBlock(CBid, CBx, CBy):
+    global RareCodeBlocks
+    CBinfo = RareCodeBlocks[CBid]
+    codeblockitem = Entity(model = 'quad', 
+                           unlit = True, 
+                           position = (CBx, CBy, 0.1), 
+                           scale = (2, 1, 1), 
+                           CBid = CBid, 
+                           Active = True,
+                           despawnable = True, 
+                           playercollision = False,
+                           rare = True)
+    codeblockitem.collider = BoxCollider(codeblockitem, 
+                                         center = Vec3(0, 0, 0), 
+                                         size = (1.2, 1.6, 1))
+    codeblockitem.texture = load_texture(CBinfo[0])
+    return codeblockitem
+
+def CreateRareCodeBlock(CBid):
+    global RareCodeBlocks, CurrentCodeBlocks
+    texture, code = RareCodeBlocks[CBid]
+    CreatedCodeBlock = CodeBlock(texture, code, visible = False)
+    for c in CurrentCodeBlocks:
+        if CreatedCodeBlock.intersects(c):
+            CreatedCodeBlock.x += 0.2
+    CurrentCodeBlocks.append(CreatedCodeBlock)
+    return CreatedCodeBlock
 
 def scrollblock(direction):
     if direction == 'up':
         cbpep.scale = ((cbpep.scale.x * 1.1), (cbpep.scale.y * 1.1), 0.1)
     elif direction =='down':
         cbpep.scale = ((cbpep.scale.x * 0.9), (cbpep.scale.y * 0.9), 0.1)
+
+CodeBlocksGuide = Entity(model = 'quad', texture = load_texture('CodeBlocks/CodeBlocksGuide'), scale = (1, 1.3), z = -0.1, parent = cbpe, visible = False)

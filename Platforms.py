@@ -1,14 +1,15 @@
 from ursina import *
 from CodeBlocks import *
 from Player import *
+from Enemy import *
+     
 
 quad = load_model('quad', use_deepcopy=True)
 level_parent = Entity(model=Mesh(vertices=[], uvs=[]), texture='white_cube')
-ItemCodeBlocks = []
 loaded_chunks = {}
 LockedDoors = []
 
-def make_level(texture, offset_x, offset_y, chunkx, chunky, randomdoors = True):
+def make_level(texture, offset_x, offset_y, chunkx, chunky, randomdoors = True, bossdisable = False, bossguarentee = False):
     for y in range(texture.height):
         collider = None
         for x in range(texture.width):
@@ -25,7 +26,8 @@ def make_level(texture, offset_x, offset_y, chunkx, chunky, randomdoors = True):
                                       position=(world_x,world_y), 
                                       model='cube', 
                                       origin=(-.5,-.5), 
-                                      collider='box', 
+                                      collider='box',
+                                      despawnable = True, 
                                       visible=False)
                 else:
                     collider.scale_x += 1
@@ -37,7 +39,10 @@ def make_level(texture, offset_x, offset_y, chunkx, chunky, randomdoors = True):
                 player.position = player.start_position
             
             if col == color.red:
-                ItemCodeBlocks.append(GenerateCodeBlock(RandomCodeBlock(), (world_x + 0.5), (world_y + 0.5)))
+                if random.randint(1, 5) == 5:
+                     ItemCodeBlocks.append(GenerateRareCodeBlock(RandomRareCodeBlock(), (world_x) + 0.5, (world_y + 0.5)))
+                else:
+                     ItemCodeBlocks.append(GenerateCodeBlock(RandomCodeBlock(), (world_x + 0.5), (world_y + 0.5)))
             
             if col == color.blue:
                  if x > (texture.width / 2) + 5 or x < (texture.width / 2) - 5:
@@ -45,6 +50,15 @@ def make_level(texture, offset_x, offset_y, chunkx, chunky, randomdoors = True):
                  elif y > (texture.height / 2) + 5 or y < (texture.height / 2) - 5:
                     CreateLockedDoorH(world_x, world_y, randomdoors)
 
+            if col == color.yellow:
+                 if bossguarentee:
+                      BossLevel(world_x, world_y)
+                 elif bossdisable:
+                      RandomEnemy((world_x, world_y + 0.5))
+                 elif random.randint(1, 20) == 1:
+                      BossLevel(world_x, world_y)
+                 else:
+                     RandomEnemy((world_x, world_y + 0.5))
             entrances = GetEntrances(texture.name)
             loaded_chunks[(chunkx, chunky)] = entrances
             
@@ -122,7 +136,11 @@ def RandomLevel(direction, x, y, chunkx, chunky):
          FilteredLevels = AvailableLevels
 
     RandomLevel = random.choice(FilteredLevels)
-    return make_level(load_texture(RandomLevel), x, y, chunkx, chunky)
+    texture = load_texture(RandomLevel)
+    if not texture:
+         print(f'Missing Texture: {RandomLevel} DEBUG STATEMENT DEBUG STATMENT READ THIS DEBUG STATMENT')
+         return
+    return make_level(texture, x, y, chunkx, chunky)
 
 def GetEntrances(Level):
      entrances = set()
@@ -143,7 +161,8 @@ def CreateLockedDoorV(x, y, randomchance, colour = 'regular'):
                               collider = 'box',
                               texture = load_texture('brick'),
                               scale = (1, 8, 1),
-                              colour = colour)
+                              colour = colour,
+                              despawnable = True)
           LockedDoors.append(LockedDoor)
      elif not randomchance:
           LockedDoor = Entity(position = (x + 0.5, y + 4),
@@ -151,7 +170,8 @@ def CreateLockedDoorV(x, y, randomchance, colour = 'regular'):
                               collider = 'box',
                               texture = load_texture('brick'),
                               scale = (1, 8, 1),
-                              colour = colour)
+                              colour = colour,
+                              despawnable = True)
           LockedDoors.append(LockedDoor)
 
 def CreateLockedDoorH(x, y, randomchance, colour = 'regular'):
@@ -161,7 +181,8 @@ def CreateLockedDoorH(x, y, randomchance, colour = 'regular'):
                               collider = 'box',
                               texture = load_texture('brick'),
                               scale = (8, 1, 1),
-                              colour = colour)
+                              colour = colour,
+                              despawnable = True)
           LockedDoors.append(LockedDoor)
      elif not randomchance:
           LockedDoor = Entity(position = (x + 4, y + 0.5),
@@ -169,5 +190,27 @@ def CreateLockedDoorH(x, y, randomchance, colour = 'regular'):
                               collider = 'box',
                               texture = load_texture('brick'),
                               scale = (8, 1, 1),
-                              colour = colour)
+                              colour = colour,
+                              despawnable = True)
           LockedDoors.append(LockedDoor)
+
+BossSpawners = []
+def BossLevel(x, y):
+     BossSpawner = Entity(position = (x, y + 1),
+                          model = 'quad',
+                          collider = 'box',
+                          scale = (1, 1.5),
+                          playercollision = False,
+                          spawned = False,
+                          color = color.rgba(0, 0, 0, 0),
+                          despawnable = True)
+     spawneranimation = Animate('bossSpawner')
+     spawneranimation.parent = BossSpawner
+     BossSpawners.append(BossSpawner)
+
+def Animate(animation):
+     if animation == 'bossSpawner':
+          spawneranimation = SpriteSheetAnimation('Sprites/BossSpawner/BossSpawnerSheet.png', tileset_size=(10,1), fps = 10, animations={'float' : ((0, 0), (9, 0))})
+          spawneranimation.scale = 3
+          spawneranimation.play_animation('float')
+          return spawneranimation

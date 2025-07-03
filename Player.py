@@ -1,5 +1,10 @@
 from ursina import *
 from CodeBlocks import *
+from Tutorial import *
+
+def SetupPlayer():
+    global player
+    player = Player()
 
 class Player(Entity):
     def __init__(self, **kwargs):
@@ -26,6 +31,12 @@ class Player(Entity):
         self.descape = 0
         self.spaceescape = 0
         self.stuckpos = 0
+        self.health = 100
+        self.flingvel = 0
+        self.hitwall = False
+        self.hitceiling = False
+        self.flingdir = self.velocity
+        self.dead = False
 
         ray = raycast(self.world_position, 
                       self.down, 
@@ -36,6 +47,9 @@ class Player(Entity):
             self.y = ray.world_point[1] + 0.01
 
     def update(self):
+        if self.dead:
+            return
+        
         self.ignore_list = [self] + [e for e in scene.entities if hasattr(e, 'playercollision')]        # Updates ignore list to include entities made after the player, and ignores entities that have playercollision attribute
         if not boxcast(
             self.position,
@@ -46,6 +60,9 @@ class Player(Entity):
             thickness=(self.scale_x*.99, self.scale_y*.9)).hit:
 
             self.x += self.velocity * time.dt * self.speed
+            self.hitwall = False
+        else:
+            self.hitwall = True
 
         self.walking = held_keys['a'] + held_keys['d'] > 0 and self.grounded
 
@@ -76,6 +93,9 @@ class Player(Entity):
                 self.air_time = 0
              if hasattr(self, 'y_animator'):
                  self.y_animator.kill()
+             self.hitceiling = True
+        else:
+             self.hitceiling = False
         
         if self.stuckcheck <= time.time():
             self.stuckcheck += 5
@@ -83,8 +103,18 @@ class Player(Entity):
             self.aescape = 0
             self.descape = 0
             self.spaceescape = 0
+        
+        if self.flingvel > 0:
+            self.fling()
+
+        if self.health <= 0:
+            self.dead = True
 
     def input(self, key):
+        if TutorialGuy.IsSpeaking:
+            return
+        if self.dead:
+            return
         if key == 'space':
             self.jump()
             self.spaceescape += 1
@@ -108,17 +138,32 @@ class Player(Entity):
         if self.jumpcooldown > time.time():
             return
         
-        self.jumpcooldown = time.time() + 1
+        self.jumpcooldown = time.time() + 0.3
 
         self.jumping = True
         self.grounded = False
 
         self.target_y = self.y + self.jumpheight
-        self.animate_y(self.target_y, 0.5, resolution = 30, curve = curve.out_expo)
-        self._start_fall_sequence = invoke(self.start_fall, delay = 0.5)
+        self.animate_y(self.target_y, 0.2, resolution = 30, curve = curve.out_expo)
+        self._start_fall_sequence = invoke(self.start_fall, delay = 0.2)
     
     def start_fall(self):
         self.jumping = False
-        
+    
+    def fling(self):
+        self.flingvel = min(self.flingvel, 150)
+        if self.flingdir == 0:
+            self.flingdir = -1
+        print(self.flingvel)
+        if self.hitwall:
+            self.flingdir *= -1
+            self.x += time.dt * 50 * self.flingdir
+        else:
+            self.x += time.dt * self.flingvel * self.flingdir
+        if not self.hitceiling:
+            self.y += time.dt * self.flingvel / 2
+        self.flingvel *= 0.8
+        if self.flingvel < 0.1:
+            self.flingvel = 0
 
 player = Player()

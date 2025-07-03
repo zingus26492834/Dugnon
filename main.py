@@ -4,7 +4,8 @@ from CodeBlocks import *
 from Platforms import *
 from Player import *
 from CodeFunctions import *
-from ursina.prefabs.conversation import *
+from Enemy import *
+from Tutorial import *
 
 # Camera Settings
 camera.orthographic = True
@@ -26,11 +27,19 @@ def GetCameraEdges():
 CodeBlocksEnabled = False
 blocksdragging = False
 blockoffset = Vec3(0, 0, 0)
+titlescreen = True
 executing = False
-
 def input(key):
+    global titlescreen
     global CodeBlocksEnabled, blockoffset, blocksdragging, executing
     # key is a variable handled by Ursina which is set to whichever key is being pressed
+
+    # Toggle Fullscreen    
+    if key == 'y':
+        window.fullscreen = not window.fullscreen
+
+    if TutorialGuy.IsSpeaking:
+        return
 
     # Toggle Executing code
     if key == 'q':
@@ -38,7 +47,7 @@ def input(key):
     # Toggle CodeBlocks UI
     if key == 'k':
         CodeBlocksEnabled = not CodeBlocksEnabled       # sets CodeBlocksEnabled boolean to whatever CodeBlocksEnable isnt
-        ToggleCodeBlocks(CodeBlocksEnabled)     # Feets boolean into ToggleCodeBlocks function
+        ToggleCodeBlocks(CodeBlocksEnabled)     # Feeds boolean into ToggleCodeBlocks function
     # Controlling CodeBlocks UI
     if key == 'scroll up' and CodeBlocksEnabled:
         scrollblock('up')
@@ -51,62 +60,68 @@ def input(key):
     if key == 'right mouse up' and CodeBlocksEnabled:
         blocksdragging = False
     
+    # Open CodeBlocks Guide
+    if key == 'p':
+        if CodeBlocksEnabled:
+            CodeBlocksGuide.visible = not CodeBlocksGuide.visible
+    
     # Debug keys
     if key == 'o':
         player.position = (camera.x, camera.y)
     if key == 'h':
         print(player.position)
-
-    # Toggle Fullscreen    
-    if key == 'y':
-        window.fullscreen = not window.fullscreen
+    if key == 'g':
+        BossLevel(player.x + 4, player.y + 1)
 
     # This needs to be here to read keyboard inputs, however does not normally run every frame (check update func)
     if executing:
         execute(key)
 
-    # Tutorial
-    global Tutorial2, Tutorial1, Tutorial3
-    if key =='k' and Tutorial2:     # If CodeBlocks UI is opened during a certain part of the tutorial
-        TutorialGuyConvo2.enabled = True        # Reenable conversation UI
-        TutorialGuyConvo2.start_conversation(TutorialGuy2)      # Begin tutorial conversation
-        Tutorial2 = False       # Ends second part of the tutorial
-        Tutorial3 = True        # Begins third part of the tutorial
-        TutorialGuy.position = (19.5, 7.5, 0)     # Moves TutorialGuy to the second position
+    # Boss Spawners
+    global LockRoom
+    for B in BossSpawners:
+        if player.intersects(B) and not B.spawned and key == 'space':
+            B.enabled = False
+            B.despawnable = False
+            B.spawned = True
+            LockRoom = True
+            BossEnemy(position = (B.x, B.y + 2), spawntime = time.time())
+
 
 ################################################################################
 
 # Update loop handled by Ursina automatically
 chunkx = 0
 chunky = 0
-Tutorial = True
 incrementchunk = False
 keynotification = False
 keycolour = 'regular'
 keymessage = Text(text = f'You need a {keycolour} key to open this door', origin = (0, -3), scale = 2, visible = False, parent = camera.ui)
 # Update Function, runs every tick
 def update():
+    global titlescreen
+    if titlescreen:
+        return
+    
     global CameraEdges, chunkx, chunky, incrementchunk, executing
-
     for i in ItemCodeBlocks:        # Checks every CodeBlock pickup
         if player.intersects(i).hit and i.Active:       # If player and pickup intersect
-            CreateCodeBlock(i.CBid)     # Creates a CodeBlock in the image of the pickup
+            if hasattr(i, 'rare'):
+                CreateRareCodeBlock(i.CBid)
+            else:
+                CreateCodeBlock(i.CBid)     # Creates a CodeBlock in the image of the pickup
             i.Active = False        # Disables pickup code
+            i.despawnable = False
             i.enabled = False       # Disables pickup
     if blocksdragging:      # If player is panning the blocks
         mouselocalpos = cbpep.get_relative_point(camera.ui, mouse.position)     # Finds accurate position of mouse(can be wildly inaccurate otherwise)
         cbpe.position = (mouselocalpos - blockoffset)       # Moves codeblock parent entity with mouse (pans blocks ui)
-
-    #for e in scene.entities:
-    #    if hasattr(e, 'collider') and e.collider:
-   #         e.collider.visible = True
 
     # Creates variable for every camera edge
     cright_edge, ctop_edge, cleft_edge, cbottom_edge = CameraEdges
 
     # Check every edge, create new levels, and screen transitions handling
     # Right edge
-    global Tutorial5, Tutorial6, Tutorial7
     if player.position.x >= cright_edge:        # If player moves beyond the right side of the screen
         newcamerapos = cright_edge + width      # New camera position is 1 screen to the right
         player.velocity = 0     # Stops the player's horizonal movement
@@ -127,18 +142,6 @@ def update():
             CameraEdges = GetCameraEdges()      # Checks new Camera Edges
             player.gravity = 1      # Reenables gravity for the player
             incrementchunk = False      # Sets up for next chunk to be loaded
-            if Tutorial5:
-                TutorialGuyConvo5.enabled = True
-                TutorialGuyConvo5.start_conversation(TutorialGuy5)
-                Tutorial5 = False
-                Tutorial6 = True
-                TutorialGuy.position = (49, 1.5)
-            elif Tutorial6:
-                TutorialGuyConvo6.enabled = True
-                TutorialGuyConvo6.start_conversation(TutorialGuy6)
-                Tutorial6 = False
-                Tutorial7 = True
-                TutorialGuy.position = (58, 1.5)
 
     # Top edge
     if player.position.y >= ctop_edge:       # If player moves above the top of the screen
@@ -161,11 +164,7 @@ def update():
             CameraEdges = GetCameraEdges()      # Checks new Camera Edges
             player.gravity = 1      # Reenables gravity for the player
             incrementchunk = False      # Sets up for next chunk to be loaded
-            if Tutorial7:
-                TutorialGuyConvo7.enabled = True
-                TutorialGuyConvo7.start_conversation(TutorialGuy7)
-                Tutorial7 = False
-                TutorialGuy.enabled = False
+                
 
     # Left edge
     if player.position.x <= cleft_edge:     # If player moves beyond the left side of the screen
@@ -216,27 +215,22 @@ def update():
             player.y += 1
 
     # Locked Doors
-    global Tutorial4, keycolour, starttime, keynotification
+    global keycolour, starttime, keynotification
     for L in LockedDoors:       # Checks every Locked Door
         for K in ExistingKeys:      # Checks every Key
             # If door and key intersect, remove both
             if L.intersects(K):
+                L.despawnable = False
                 L.enabled = False
                 K.enabled = False
-                # When the first Locked Door is opened and the tutorial has progressed enough, play end of tutorial conversation and end tutorial
-                if Tutorial4:
-                    TutorialGuyConvo4.enabled = True
-                    TutorialGuyConvo4.start_conversation(TutorialGuy4)
-                    Tutorial4 = False
-                    Tutorial5 = True
-        if L.intersects(player):
+        if L.intersects(player) and L.enabled:
             keynotification = True
             starttime = time.time()
             keycolour = L.colour
 
     if keynotification:
         keymessage.visible = True
-        if keycolour is not 'regular':
+        if keycolour != 'regular':
             keymessage.color = getattr(color, keycolour)
         else:
             keymessage.color = color.yellow
@@ -283,144 +277,137 @@ def update():
         # If shooting modification, move key horizontally
         if hasattr(k, 'shooting'):
             k.x += time.dt * k.speed
-    
-    # Tutorial
-    global Tutorial1, Tutorial2, Tutorial3
-    # First TutorialGuy position
-    if player.intersects(TutorialGuy) and Tutorial1:        # If the player hasn't begun the tutorial and touches TutorialGuy
-        TutorialGuyConvo1.enabled = True        # Reenables conversation UI now that its needed
-        TutorialGuyConvo1.start_conversation(TutorialGuy1)      # Begins conversation with dialogue defined in variable
-        Tutorial1 = False       # Marks the first of 4 parts of the tutorial complete
-        Tutorial2 = True        # and moves on to the second part
-    # Second TutorialGuy position
-    if player.intersects(TutorialGuy) and Tutorial3:        # If the player progressed to the point where TutorialGuy moves and touches TutorialGuy
-        TutorialGuyConvo3.enabled = True
-        TutorialGuyConvo3.start_conversation(TutorialGuy3)
-        Tutorial3 = False
-        Tutorial4 = True
-    
-    # Solves problem of execute not running every frame by called input function every frame regardless of input
+    for j in ExistingJospeps:
+        if currenttime - j.spawntime > 1.5:
+            j.enabled = False
+            ExistingJospeps.remove(j)
+        j.x += time.dt * j.speed
+
+    for e in [e for e in scene.entities if hasattr(e, 'Enemy') and e.enabled]:
+        for a in [a for a in ExecutedEntities if hasattr(a, 'damage')]:
+            if a.intersects(e) and e.hurtcooldown - time.time() <= 0:
+                e.health -= a.damage
+                e.hurtcooldown = time.time() + 0.5
+                a.spawntime -= 20
+
+    # Solves problem of execute not running every frame by called input function every frame regrdless of input
     if executing:
         input(None)
+
+    if player.dead:
+        DeathSplash.enabled = True
+        ReturnButton.enabled = True
     
+    for e in scene.entities:
+        if hasattr(e, 'despawnable') and e.despawnable:
+            if distance(player, e) > 100:
+                e.enabled = False
+                #e.visible = False
+            else:
+                e.enabled = True
+                #e.visible = True
+
+    # Tutorial
+    if player.intersects(TutorialEntity) and TutorialEntity.enabled:
+        TutorialGuy.visible = True
+    if TutorialGuy.IsSpeaking:
+        player.velocity = 0
+    if TutorialGuy.SecretObtained:
+        CurrentCodeBlocks.append(CodeBlock(texture = 'CodeBlocks/Jospep.png', code = "ExecutedEntities.append(Jospep(", visible = False))
+        TutorialGuy.SecretObtained = False
     
+    if LockRoom:
+        TopLockCollider.enabled = True
+        BottomLockCollider.enabled = True
+        RightLockCollider.enabled = True
+        LeftLockCollider.enabled = True
+        TopLockCollider.position = (cright_edge, ctop_edge)
+        BottomLockCollider.position = (cright_edge, cbottom_edge)
+        RightLockCollider.position = (cright_edge, cbottom_edge + 1)
+        LeftLockCollider.position = (cleft_edge, cbottom_edge + 1)
+    else:
+        TopLockCollider.enabled = False
+        BottomLockCollider.enabled = False
+        RightLockCollider.enabled = False
+        LeftLockCollider.enabled = False
+
 ################################################################################
 
-# Tutorial
-
-# Tutorial Codeblocks
-StartIf = CreateCodeBlock(0)
-StartIf.position += (-0.7, 0.3)     # Moves CodeBlocks to create a default Snippet, gives player an example/template of what Snippets should look like
-StartKeyE = CreateCodeBlock(15)
-StartKeyE.position += (-0.5, 0.3)
-StartColon = CreateCodeBlock(1)
-StartColon.position += (-0.3, 0.3)
-StartKey = CreateCodeBlock(19)
-StartKey.position += (-0.1, 0.3)
-StartMake = CreateCodeBlock(17)
-StartMake.position += (0.1, 0.3)
-StartBlock = CreateCodeBlock(13)
-StartBlock.position += (-0.1, 0.1)
-
-# Tutorial Variables and Objects
-Tutorial1 = True
-Tutorial2 = False
-Tutorial3 = False
-Tutorial4 = False
-Tutorial5 = False
-Tutorial6 = False
-Tutorial7 = False
-TutorialGuyConvo1 = Conversation()        # Creates an object handled by an Ursina prefab to handle conversations
-TutorialGuyConvo1.enabled = False       # Conversation template appears on game start otherwise
-TutorialGuyConvo2 = Conversation()        # Theoretically I should only need 1 conversation object for all conversations, but in practice that's not how it works
-TutorialGuyConvo2.enabled = False
-TutorialGuyConvo3 = Conversation()
-TutorialGuyConvo3.enabled = False
-TutorialGuyConvo4 = Conversation()
-TutorialGuyConvo4.enabled = False
-TutorialGuyConvo5 = Conversation()
-TutorialGuyConvo5.enabled = False
-TutorialGuyConvo6 = Conversation()
-TutorialGuyConvo6.enabled = False
-TutorialGuyConvo7 = Conversation()
-TutorialGuyConvo7.enabled = False
-TutorialGuy = Entity(position = (15, 1.5, 0),
-                     model = 'quad',
-                     collider = 'box',
-                     scale = (1, 1, 1),
-                     playercollision = False,
-                     texture = load_texture('Sprites/TutorialGuy'))
-
-# Tutorial Conversations
-TutorialGuy1 = dedent('''
-                         Hi, I'm TutorialGuy.
-                         Press K to view your "CodeBlocks", we will continue our conversation there.
-                         ''')
-TutorialGuy2 = dedent('''
-                         This the menu for your "CodeBlocks".
-                         You can move the screen with scroll and right click.
-                         Right now you have a "Snippet" that creates a key when you press E.
-                         Try replacing the "key" block with the "block" block.
-                         Remember, the CodeBlocks will snap into a snippet in order of the last dropped block.
-                         This means in the future you may have to move the "make" block as well,
-                         otherwise the "block" block would snap to the other side of the "make" block.
-                         For now you shouldn't have to move it.
-                         Once you're done, press Q to start running your CodeBlocks.
-                         I will meet you again at the top of this wall.
-                         ''')
-TutorialGuy3 = dedent('''
-                         Now that you've made it up the wall we have a new problem.
-                         There is a locked door blocking our path.
-                         Try switching the key and the block one more time and open the door.
-                         You may want to press Q again to stop the code from running while you are editing it.
-                        ''')
-TutorialGuy4 = dedent('''
-                         Great job!
-                         Now on to the next room.
-                      ''')
-TutorialGuy5 = dedent('''
-                         Uh oh!
-                         You can't unlock some of these doors!
-                         You may have to come back later if you want to unlock horizontal doors.
-                         You will need some way for the key to be moved or placed downward.
-                         Additionally, some doors are different colours,
-                         this means they need different coloured keys to open them.
-                         For now you can only move to the right.
-                         Be sure to pick up that CodeBlock on your way through as well!
-                      ''')
-TutorialGuy6 = dedent('''
-                         Another horizontal door!
-                         The only path is up.
-                         See those CodeBlocks on the ground?
-                         Rather than moving the "block" and "key" blocks around,
-                         try making a new snippet with these CodeBlocks to move on to the next screen.
-                         You can use the pre-generated snippet as a template if you want.
-                      ''')
-TutorialGuy7 = dedent('''
-                         Great job!
-                         I'll leave you alone now.
-                         Goodbye!
-                      ''')
-
-# Start game / Load tutorial levels, load tutorial codeblock items
-make_level(load_texture('Levels/platformer_tutorial_level'), 2, 0, 0, 0, randomdoors = False)        # Creates the tutorial level / starting room
-player.y += 2       # Makes sure the player doesn't get stuck in the ground
 CameraEdges = GetCameraEdges()      # Finds edges of the starting screen
 cright_edge, ctop_edge, cleft_edge, cbottom_edge = CameraEdges
-# Make first 3 levels after start room non random
-make_level(load_texture('Levels/intersection'), cright_edge, cbottom_edge, 1, 0, randomdoors = False)
-make_level(load_texture('Levels/trisection4'), cright_edge + width, cbottom_edge, 2, 0, randomdoors = False)
-make_level(load_texture('Levels/trisection1'), cright_edge + width, ctop_edge, 2, 1)
-# Generate extra codeblock items for tutorial
-ItemCodeBlocks.append(GenerateCodeBlock(0, 62, 1.5))
-ItemCodeBlocks.append(GenerateCodeBlock(16, 64, 1.5))
-ItemCodeBlocks.append(GenerateCodeBlock(1, 66, 1.5))
-ItemCodeBlocks.append(GenerateCodeBlock(17, 70, 1.5))
-# Tell platforms code the tutorial levels already exist and don't need to be created again
-CheckChunk(0, 0)
-CheckChunk(1, 0)
-CheckChunk(2, 0)
-CheckChunk(2, 1)
 
+def start():
+    global CameraEdges, titlescreen
+    titlescreen = False
+    player.enabled = True
+    player.health = 100
+    player.dead = False
+    # Start game / Load tutorial levels, load tutorial codeblock items
+    make_level(load_texture('Levels/platformer_tutorial_level'), 2, 0, 0, 0, randomdoors = False)        # Creates the tutorial level / starting room
+    player.y += 2       # Makes sure the player doesn't get stuck in the ground
+    CameraEdges = GetCameraEdges()      # Finds edges of the starting screen
+    cright_edge, ctop_edge, cleft_edge, cbottom_edge = CameraEdges
+    # Make first 3 levels after start room non random
+    make_level(load_texture('Levels/intersection'), cright_edge, cbottom_edge, 1, 0, randomdoors = False, bossdisable = False)
+    make_level(load_texture('Levels/trisection4'), cright_edge + width, cbottom_edge, 2, 0, randomdoors = False)
+    make_level(load_texture('Levels/trisection1'), cright_edge + width, ctop_edge, 2, 1, bossguarentee = True)
+    # Generate extra codeblock items for tutorial
+    ItemCodeBlocks.append(GenerateCodeBlock(0, 62, 1.5))
+    ItemCodeBlocks.append(GenerateCodeBlock(16, 64, 1.5))
+    ItemCodeBlocks.append(GenerateCodeBlock(1, 66, 1.5))
+    ItemCodeBlocks.append(GenerateCodeBlock(17, 70, 1.5))
+    # Tell platforms code the tutorial levels already exist and don't need to be created again
+    CheckChunk(0, 0)
+    CheckChunk(1, 0)
+    CheckChunk(2, 0)
+    CheckChunk(2, 1)
+    # Starting Codeblocks
+    StartIf = CreateCodeBlock(0)
+    StartIf.position += (-0.7, 0.3)     # Moves CodeBlocks to create a default Snippet, gives player an example/template of what Snippets should look like
+    StartKeyE = CreateCodeBlock(15)
+    StartKeyE.position += (-0.5, 0.3)
+    StartColon = CreateCodeBlock(1)
+    StartColon.position += (-0.3, 0.3)
+    StartKey = CreateCodeBlock(19)
+    StartKey.position += (-0.1, 0.3)
+    StartMake = CreateCodeBlock(17)
+    StartMake.position += (0.1, 0.3)
+    StartBlock = CreateCodeBlock(13)
+    StartBlock.position += (-0.1, 0.1)
+    # Disable TitleScreen
+    TitleSplash.enabled = False
+    StartButton.enabled = False
+    # Create TutorialGuy
+    TutorialEntity.enabled = True
+    # Create Tutorial Messages
+    MoveTutorial.enabled = True
+    JumpTutorial.enabled = True
+    FireBlock = CreateCodeBlock(18)
+    ShootBlock = CreateCodeBlock(20)
+
+
+import sys, os
+def reset():
+    os.execv(sys.executable, ['python'] + sys.argv)
+
+TitleSplash = Text(text = 'Dugnon', origin = (0,0), scale = 3, position = (0, 0.3))
+StartButton = Button(text = 'Start', scale = (0.2, 0.1), position = (0, -0.1), color = color.red)
+StartButton.on_click = start
+ReturnButton = Button(text='Return to Title', scale = (0.2, 0.1), position = (0, -0.1), color = color.azure)
+DeathSplash = Text(text = 'You Dieded', origin = (0, 0), scale = 3, position = (0,0.3), color = color.red)
+DeathSplash.enabled = False
+ReturnButton.enabled = False
+ReturnButton.on_click = reset
+JumpTutorial = Entity(model = 'quad', texture = load_texture('Sprites/JumpTutorial.png'), position = (9, 8), scale = (4, 3.5), enabled = False)
+MoveTutorial = Entity(model = 'quad', texture = load_texture('Sprites/MoveTutorial.png'), position = (7, 11), scale = (4, 3.5), enabled = False)
+# Locks (note this code is a mess there are so many seemingly unecessary things but removing them breaks things)
+BottomLockCollider = Entity(model = 'quad', collider = 'box', position = (cright_edge, cbottom_edge), scale = (55, 1.7, 4), color = color.black, enabled = False)
+RightLockCollider = Entity(model = 'quad', collider = 'box', position = (cright_edge, camera.scale_y / 2), scale = (1.7, 30, 4), color = color.black, enabled = False)
+LeftLockCollider = Entity(model = 'quad', collider = 'box', position = (cleft_edge, camera.scale_y / 2), scale = (1.7, 30, 4), color = color.black, enabled = False)
+TopLockCollider = Entity(model = 'quad', collider = 'box', position = (cright_edge, ctop_edge), scale = (55, 1.7, 4), color = color.black, enabled = False)
+BottomLock = Entity(model = 'quad', texture = 'white_cube', color = color.black, position = (cright_edge, cbottom_edge), scale = (55, 1.7, 4), z = -0.01, parent = BottomLockCollider, enabled = False)
+RightLock = Entity(model = 'quad', texture = 'white_cube',  color = color.black, position = (cright_edge, camera.scale_y / 2), scale = (1.7, 30, 4), z = -0.01, parent = RightLockCollider, enabled = False)
+LeftLock = Entity(model = 'quad', texture = 'white_cube',  color = color.black, position = (cleft_edge, camera.scale_y / 2), scale = (1.7, 30, 4), z = -0.01, parent = LeftLockCollider, enabled = False)
+TopLock = Entity(model = 'quad', texture = 'white_cube',  color = color.black, position = (cright_edge, ctop_edge), scale = (55, 1.7, 4), z = -0.01, parent = TopLockCollider, enabled = False)
 
 app.run()      # Starts the game
