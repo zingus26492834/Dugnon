@@ -183,8 +183,6 @@ class BossEnemy(Entity):
             ItemCodeBlocks.append(GenerateRareCodeBlock(RandomRareCodeBlock(), (self.world_x) + 0.5, (self.world_y + 0.5)))
             LockRoom = False
         
-        if self.y - self.spawnheight < 5:
-            self.health -= 5000
 
         self.healthbar.scale_x = self.health / 100
 

@@ -66,19 +66,21 @@ def input(key):
             CodeBlocksGuide.visible = not CodeBlocksGuide.visible
     
     # Debug keys
+    global LockRoom
     if key == 'o':
         player.position = (camera.x, camera.y)
     if key == 'h':
         print(player.position)
     if key == 'g':
         BossLevel(player.x + 4, player.y + 1)
+    if key == 't':
+        LockRoom = False
 
     # This needs to be here to read keyboard inputs, however does not normally run every frame (check update func)
     if executing:
         execute(key)
 
     # Boss Spawners
-    global LockRoom
     for B in BossSpawners:
         if player.intersects(B) and not B.spawned and key == 'space':
             B.enabled = False
@@ -383,7 +385,9 @@ def start():
     MoveTutorial.enabled = True
     JumpTutorial.enabled = True
     FireBlock = CreateCodeBlock(18)
+    FireBlock.position += (-0.1, -0.2)
     ShootBlock = CreateCodeBlock(20)
+    ShootBlock.position += (-0.1, -0.4)
 
 
 import sys, os
