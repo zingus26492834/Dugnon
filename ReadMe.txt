@@ -12,7 +12,7 @@ Instructions for installing the game
 2. Extract the zip and make sure the main folder that everything is in (so the folder with main.py etc.) has no spaces in it
 
 
-Instructions for running the game
+Instructions for running the game on windows
 ===============================
 Open RunGame.bat
 Otherwise if that doesn't work:
@@ -20,8 +20,21 @@ Otherwise if that doesn't work:
 2. If you already have a way to open python files use that, otherwise open the folder the main.py file is located in, right click anywhere in the file (not on any of the files) and click "Open in Terminal"
 3. In the command line that it opens, write "python main.py"
 
-- If you don't use windows you'll probably have to look up how to open it if none of that works
-- Anywhere I say to write "python _____" in command line, you can try replacing it with "python3 ____" or "py ____" if it doesn't work
+
+Instructions for running the game on Mac (may not work)
+===============================
+1. Download python using the mac installer on the link above
+2. press command + space, write "terminal" and press enter
+3. navigate to where you put the file using "cd ./"
+    - e.g. if it's located in your downloads file "cd ./Users/(your pc username)/Downloads/Dugnon"
+    - e.g. if it's located on your desktop "cd ./Users/(your pc username)/Desktop/Dugnon"
+    - Replace Dugnon with whatever you named the file, it likely won't be named Dugnon
+4. write "python3 main.py"
+
+
+
+- For some reason you need a mac to make an executeable for mac, and I don't have a mac, so you may need to just google a way to run it on mac if my instructions for mac don't work
+- Anywhere I say to write "python _____" in command line, you can try replacing it with "python3 ____" or "py ____" if it doesn't work, mac will need "python3"
 
 
 Note
