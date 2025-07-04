@@ -23,6 +23,9 @@ Otherwise if that doesn't work:
 
 Instructions for running the game on Mac (may not work)
 ===============================
+Open RunGame.command (it may be flagged by antivirus because I'm not a "verified developer")
+It also may not work because I haven't tested it.
+If that doesn't work or you don't trust me:
 1. Download python using the mac installer on the link above
 2. press command + space, write "terminal" and press enter
 3. navigate to where you put the file using "cd ./"
@@ -31,15 +34,16 @@ Instructions for running the game on Mac (may not work)
     - Replace Dugnon with whatever you named the file, it likely won't be named Dugnon
 4. write "python3 main.py"
 
-
-
-- For some reason you need a mac to make an executeable for mac, and I don't have a mac, so you may need to just google a way to run it on mac if my instructions for mac don't work
-- Anywhere I say to write "python _____" in command line, you can try replacing it with "python3 ____" or "py ____" if it doesn't work, mac will need "python3"
+- I don't have a mac so I just have to trust this will work
+- I tried using Liam's laptop to open the game but either because his laptop is slow (which he said) or because it doesn't work on mac, it ran unbelievably slow and was completely unplayable (it took ~30 seconds to load just the main menu, which was then unresponsive)
 
 
 Note
 ================================
-Note that this game is not finished so if it looks bad that's why. It should be mostly functional and bug free I hope
-Take screenshots of any bugs, cool snippets, etc. while playing the game for the form please
-Feedback form - https://forms.gle/dZyNVbkYS5LxEysq5
-Also having the game console (so if you ran it from command line it would be the command line) open might help you, and if it screams at you that there is a debug statement please take a screenshot if you can
+- Note that this game is not finished so if it looks bad that's why. It should be mostly functional and bug free I hope
+- Take screenshots of any bugs, cool snippets, etc. while playing the game for the form please
+- Feedback form - https://forms.gle/dZyNVbkYS5LxEysq5
+- Also having the game console (so if you ran it from command line it would be the command line) open might help you, and if it screams at you that there is a debug statement please take a screenshot if you can
+- Anywhere I say to write "python _____" in command line, you can try replacing it with "python3 ____" or "py ____" if it doesn't work, mac will need "python3"
+
+- Thanks to Lulu and Liam's laptops for the RunGame.command file (it can only be made on a mac and I use windows)
