@@ -35,7 +35,6 @@ If that doesn't work or you don't trust me:
 4. write "python3 main.py"
 
 - I don't have a mac so I just have to trust this will work
-- I tried using Liam's laptop to open the game but either because his laptop is slow (which he said) or because it doesn't work on mac, it ran unbelievably slow and was completely unplayable (it took ~30 seconds to load just the main menu, which was then unresponsive)
 
 
 Note
