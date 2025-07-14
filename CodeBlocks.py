@@ -1,3 +1,4 @@
+# Imports
 from ursina import *
 from CodeFunctions import *
 from Player import player
@@ -19,10 +20,10 @@ class CodeBlock(Button):
                          unlit = True, 
                          parent = cbpe, 
                          **kwargs)
-        self.code = code
+        self.code = code        # Code here is a string fed into execute()
         self.texture = load_texture(texture)    # This has to be loaded after the model to properly be applied
-        self.dragging = False
-        self.Active = False
+        self.dragging = False       # Determines whether codeblock is being dragged or not
+        self.Active = False     # If menu is not open, stops interaction
         code_blocks.append(self)        # Adds code block to code_blocks list
 
     # Loop using Ursina's update function
@@ -30,14 +31,14 @@ class CodeBlock(Button):
         global last_block       # Allows last_block to be used in this function
         if self.Active:
             if self.dragging:
-                mouselocalpos = cbpe.get_relative_point(camera.ui, mouse.position)
+                mouselocalpos = cbpe.get_relative_point(camera.ui, mouse.position)      # Finds mouse position relative to codeblocks ui, since mouse is based off ui and codeblocks ui is a seperate ui
                 self.position = (mouselocalpos.x, mouselocalpos.y)      # Drags block with mouse
             elif last_block == self:        # Makes sure only the last dragged block gets snapped
                 self.SnapToBlock()      # Snaps block if not being dragged
 
     # Function to drag blocks
     def input(self, key):
-        if TutorialGuy.IsSpeaking:
+        if TutorialGuy.IsSpeaking:      # Stops movement while Nosed One is speaking
             return
         if not self.enabled:
             return
@@ -63,11 +64,8 @@ ExecutedEntities = []
 def execute(key = None, **kwargs):
         blockgroups = []
         sortedblocks = set()
-        ExecuteArgs = {**globals(),
+        ExecuteArgs = {**globals(),     # Makes sure it properly registers these
                 'key' : key, 
-                'FireableBlock' : FireableBlock,
-                'FireableFire' : FireableFire,
-                'FireableKey' : FireableKey,
                 'player' : player}
 
         # Groups code blocks that are snapped together
@@ -94,9 +92,11 @@ def execute(key = None, **kwargs):
         blockgroups.sort(key=lambda group: min(block.position.y for block in group), reverse = True)        # Sorts groups to be executed in order of top to bottom
 
         # Executes groups
+        noexecutedgroups = 0
         for i, group in enumerate(blockgroups):     # Ensures each group is executed in order
-            if len(group) > 1:      # Excludes groups with 1 block only
-                print(f"Group {i + 1}:")        # Displays which group is being executed
+            if len(group) > 2:      # Excludes groups with 2 or less blocks
+                noexecutedgroups += 1
+                print(f"Group {noexecutedgroups}:")        # Displays which group is being executed
                 executedcode = ''.join([block.code for block in group])     # Joins code to be functional (if blocks are correctly ordered)
                 print(executedcode)     # Displays code that will be executed
                 try:        # Prevents crashing if code is incorrect
@@ -104,30 +104,32 @@ def execute(key = None, **kwargs):
                 except Exception as e:
                     print(f"Error: {e}")        # Displays what went wrong if code is incorrect
 
-
+# Make list of all codeblocks that can be generated
 def CodeBlocksList():
-    AvailableCodeBlocks = []
-    with open('CodeBlocks/CodeBlocksList.txt', 'r') as CBL:
-        for line in CBL:
-            line = line.rstrip('\n')
-            if '|' in line:
-                line = line.strip().split('|', 1)[0]
-            strippedline = line.split(',', 1)
-            if len(strippedline) > 1:
-                strippedline[1] = strippedline[1].replace('\\n', '\n')
-            AvailableCodeBlocks.append(strippedline)
+    AvailableCodeBlocks = []        # List for codeblocks
+    with open('CodeBlocks/CodeBlocksList.txt', 'r') as CBL:      # Open codeblocks list
+        for line in CBL:        # Check every line in the file
+            line = line.rstrip('\n')        # I forgot what this does actually I think it separates lines at the end of the line but also i think "for line in" does that anyway?
+            if '|' in line:     # Makes sure to end each line at '|', ensures it counts spaces at the end of lines
+                line = line.strip().split('|', 1)[0]        
+            strippedline = line.split(',,', 1)      # Separates line at ',,' since each line is 2 parts
+            if len(strippedline) > 1:       # I think this makes sure it doesn't count every new line
+                strippedline[1] = strippedline[1].replace('\\n', '\n')      # Replaces \n with \\n since the 2 \\ are merged and treated as \n in string, but if it were just \n it would consider that a new line instead
+            AvailableCodeBlocks.append(strippedline)        # Add the line to available code blocks
     return AvailableCodeBlocks
 
+# Randomly generate codeblock
 def RandomCodeBlock():
-    ACB = CodeBlocksList()
-    ACBCount = 0
-    for CB in ACB:
-        ACBCount += 1
-    return random.randint(0, ACBCount - 1)
+    ACB = CodeBlocksList()      # Gets list of every codeblock
+    ACBCount = 0        # Count for codeblocks
+    for CB in ACB:      # for Every Codeblock
+        ACBCount += 1   # Count goes up 1
+    return random.randint(0, ACBCount - 1)      # Returns a random number between 0 and the count - 1 (since python counts start at 0 and this one started at 1)
 
+# Generate codeblock as item
 def GenerateCodeBlock(CBid, CBx, CBy):
     ACB = CodeBlocksList()
-    CBInfo = ACB[CBid]
+    CBInfo = ACB[CBid]      # Info for codeblockitem, necessary when picked up
     codeblockitem = Entity(model = 'quad', 
                            unlit = True, 
                            position = (CBx, CBy, 0.1), 
@@ -139,43 +141,54 @@ def GenerateCodeBlock(CBid, CBx, CBy):
     codeblockitem.collider = BoxCollider(codeblockitem, 
                                          center = Vec3(0, 0, 0), 
                                          size = (1.2, 1.6, 1))
-    codeblockitem.texture = load_texture(CBInfo[0])
+    codeblockitem.texture = load_texture(CBInfo[0])     # Item texture is codeblock's textuer
     return codeblockitem
 
 CurrentCodeBlocks = []
+# Create CodeBlock based on Id
 def CreateCodeBlock(CBid):
     global CurrentCodeBlocks
     CBList = CodeBlocksList()
-    texture, code = CBList[CBid]
-    CreatedCodeBlock = CodeBlock(texture, code, visible = False)
+    texture, code = CBList[CBid]        # Get texture and code from Id in list
+    CreatedCodeBlock = CodeBlock(texture, code, visible = False)        # Create codeblock using above
+    # Attempt to move created block out of the way so it isn't overlapping other blocks
     for c in CurrentCodeBlocks:
         if CreatedCodeBlock.intersects(c):
             CreatedCodeBlock.x += 0.2
     CurrentCodeBlocks.append(CreatedCodeBlock)
     return CreatedCodeBlock
 
+cbpe.y -= 3     # Moves codeblock parent entity down 3 to make sure codefunctions dont aim at it, since it's calculated on screen space not world space and would return a value between -1 and 1
+# Toggle CodeBlocks
 def ToggleCodeBlocks(Active):
     global CurrentCodeBlocks
+    if Active:      # Moves codeblock parent entity back up 3 and on to the screen
+        cbpe.y += 3
+    else:
+        cbpe.y -= 3     # Moves cbpe back off screen
     for c in CurrentCodeBlocks:
+        # If active, make functional and visible, otherwise don't
         if Active:
             c.Active = True
             c.visible = True
         else:
             c.Active = False
             c.visible = False
-            CodeBlocksGuide.visible = False
+            CodeBlocksGuide.visible = False     # Also disable the guide
 
 RareCodeBlocks = []
+# create list for rare codeblocks (same as above just not function and different file)
 with open('CodeBlocks/RareCodeBlocksList.txt', 'r') as RCBL:
     for line in RCBL:
         line = line.rstrip('\n')
         if '|' in line:
             line = line.strip().split('|', 1)[0]
-        strippedline = line.split(',', 1)
+        strippedline = line.split(',,', 1)
         if len(strippedline) > 1:
             strippedline[1] = strippedline[1].replace('\\n', '\n')
         RareCodeBlocks.append(strippedline)
-            
+
+# Create random rare block (same as above just different list)            
 def RandomRareCodeBlock():
     global RareCodeBlocks
     RCBCount = 0
@@ -183,6 +196,7 @@ def RandomRareCodeBlock():
         RCBCount += 1
     return random.randint(0, RCBCount - 1)
 
+# Create rare codeblock item (same as above just different list)
 def GenerateRareCodeBlock(CBid, CBx, CBy):
     global RareCodeBlocks
     CBinfo = RareCodeBlocks[CBid]
@@ -201,6 +215,7 @@ def GenerateRareCodeBlock(CBid, CBx, CBy):
     codeblockitem.texture = load_texture(CBinfo[0])
     return codeblockitem
 
+# Create Rare CodeBlock based on Id (same as above just different list)
 def CreateRareCodeBlock(CBid):
     global RareCodeBlocks, CurrentCodeBlocks
     texture, code = RareCodeBlocks[CBid]
@@ -211,10 +226,12 @@ def CreateRareCodeBlock(CBid):
     CurrentCodeBlocks.append(CreatedCodeBlock)
     return CreatedCodeBlock
 
+# Zoom in and out
 def scrollblock(direction):
-    if direction == 'up':
+    if direction == 'up':       # If scrolldirection is up, make ui bigger / zoom in
         cbpep.scale = ((cbpep.scale.x * 1.1), (cbpep.scale.y * 1.1), 0.1)
-    elif direction =='down':
+    elif direction =='down':    # If scrolldirection is down, make ui smaller / zoom out
         cbpep.scale = ((cbpep.scale.x * 0.9), (cbpep.scale.y * 0.9), 0.1)
 
+# CodeBlocksGuide entity
 CodeBlocksGuide = Entity(model = 'quad', texture = load_texture('CodeBlocks/CodeBlocksGuide'), scale = (1, 1.3), z = -0.1, parent = cbpe, visible = False)

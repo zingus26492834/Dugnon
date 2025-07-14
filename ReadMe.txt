@@ -30,3 +30,21 @@ Note that this game is not finished so if it looks bad that's why. It should be 
 Take screenshots of any bugs, cool snippets, etc. while playing the game for the form please
 Feedback form - https://forms.gle/dZyNVbkYS5LxEysq5
 Also having the game console (so if you ran it from command line it would be the command line) open might help you, and if it screams at you that there is a debug statement please take a screenshot if you can
+I did not make any of the audio, credits below
+
+TitleScreen Theme - https://www.youtube.com/watch?v=GKlAHqsiG1w
+Main Theme - https://www.youtube.com/watch?v=swTx0bY9anw&list=PLysDEbJjdAUMou7Fsx33nbMpCW3KnJdBd&index=19
+Boss Theme - https://www.youtube.com/watch?v=8uOPuu5HDws&list=PLysDEbJjdAUMou7Fsx33nbMpCW3KnJdBd&index=20
+Non Scary Main Theme - https://www.youtube.com/watch?v=DstO9slC_5U&list=PLKXdyINOQYsaHwm4rJ0QDFzsaZQNQjF0U&index=26
+Non Scary Boss Theme - https://www.youtube.com/watch?v=F2PJbTuZlTU&list=PLKXdyINOQYsaHwm4rJ0QDFzsaZQNQjF0U&index=27
+
+Misc sfx:
+https://pixabay.com/sound-effects/gameboy-pluck-41265/
+https://pixabay.com/sound-effects/explosion-9-340460/
+https://pixabay.com/sound-effects/one-beep-99630/
+https://pixabay.com/sound-effects/sfx18-glitch-338377/
+https://pixabay.com/sound-effects/sfx-jump-07-80241/
+https://pixabay.com/sound-effects/8bit-ringtone-free-to-use-loopable-44702/
+https://pixabay.com/sound-effects/8-bit-explosion-10-340462/
+https://pixabay.com/sound-effects/retro-hurt-2-236675/
+https://pixabay.com/sound-effects/8-bit-laser-151672/

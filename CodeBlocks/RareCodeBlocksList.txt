@@ -1,1 +1,21 @@
-CodeBlocks/smile.png,"Smiley Face"|
+CodeBlocks/fire.png,,ExecutedEntities.append(FireableFire(|
+CodeBlocks/aim.png,,modification = 'aiming'))|
+CodeBlocks/EKey.png,,key == 'e'|
+CodeBlocks/FKey.png,,key == 'f'|
+CodeBlocks/player.png,,player.|
+CodeBlocks/damage.png,,damage|
+CodeBlocks/shoot.png,,modification = 'shooting'|
+CodeBlocks/blue.png,,'blue'|
+CodeBlocks/red.png,,'red'|
+CodeBlocks/colour.png,,colour 
+CodeBlocks/portal.png,,ExecutedEntities.append(SummonPortal(x = (camera.x + camera.scale_x / 2 - 0.5), y = (camera.y + camera.scale_y / 2 + 1.5), chunkx = (random.randint(5000, 500000)), chunky = (random.randint(5000, 500000)), |
+CodeBlocks/health.png,,health|
+CodeBlocks/100.png,,100|
+CodeBlocks/GKey.png,,key == 'g'|
+CodeBlocks/RKey.png,,key == 'r'|
+CodeBlocks/HKey.png,,key == 'e'|
+CodeBlocks/TKey.png,,key == 't'|
+CodeBlocks/laser.png,,ExecutedEntities.append(FireableLaser(|
+CodeBlocks/JumpHeight.png,,jumpheight|
+CodeBlocks/Scale.png,,scale|
+Codeblocks/newline.png,,\n    |

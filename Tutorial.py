@@ -1,13 +1,22 @@
+# Imports
 from ursina import *
 
+# Create Tutorial Entity / Nosed One (Sometimes referred to as TutorialGuy)
 TutorialEntity = Entity(model = 'quad',
                         collider = 'box',
-                        texture = load_texture('Sprites/TutorialGuy.png'),
-                        position = (15, 1.5),
-                        scale = (1, 1),
+                        color = color.rgba(0, 0, 0, 0),     # Invisible, self.visible = False would make all children also invisible
+                        position = (15, 2),
+                        scale = (2, 2),
                         enabled = False,
                         playercollision = True)
 
+# Nosed One Animation Creation
+animation = SpriteSheetAnimation('Sprites/NosedOne/NosedOneSheet.png', tileset_size=(7,1), fps = 6, animations={'spin' : ((0, 0), (6, 0))}, doublesided = True)
+animation.scale = 1
+animation.play_animation('spin')
+animation.parent = TutorialEntity       # Parent Animation to TutorialEntity
+
+# Class to control all Tutorial Dialogue and UI
 class Tutorial(Entity):
     def __init__(self, **kwargs):
         super().__init__(model = 'quad',
@@ -17,62 +26,64 @@ class Tutorial(Entity):
                          parent = camera.ui,
                          visible = False,
                          **kwargs)
-        self.AdvanceDialogue = 0
-        self.Dialogue = Text(text='',
+        self.AdvanceDialogue = 0        # Checks how far dialogue has progressed
+        self.Dialogue = Text(text='',       # Dialogue text
                              scale = (1, 1),
-                             position = (-0.2, -0.3),
+                             position = (-0.2, -0.2),
                              z = -0.1,
                              color = color.white,
                              parent = camera.ui)
-        self.DialogueBorder = Entity(model = 'quad',
+        self.DialogueBorder = Entity(model = 'quad',        # Dialogue white border
                                      color = color.white,
                                      scale = (1.05, 1.1),
                                      parent = self,
                                      z = 0.1)
-        self.RedCircle1 = Entity(model = 'quad',
+        self.RedCircle1 = Entity(model = 'quad',        # Red Circle
                                  texture = load_texture('Sprites/RedCircle.png'),
                                  z = -0.1,
                                  parent = camera.ui,
                                  visible = False)
-        self.RedCircle2 = Entity(model = 'quad',
+        self.RedCircle2 = Entity(model = 'quad',        # Duplicate Red Circle
                                  texture = load_texture('Sprites/RedCircle.png'),
                                  z = -0.1,
                                  parent = camera.ui,
                                  visible = False)
-        self.RedArrow1 = Entity(model = 'quad',
+        self.RedArrow1 = Entity(model = 'quad',         # Red Arrow
                                  texture = load_texture('Sprites/RedArrow.png'),
                                  z = -0.1,
                                  parent = camera.ui,
                                  visible = False)
-        self.RedArrow2 = Entity(model = 'quad',
+        self.RedArrow2 = Entity(model = 'quad',         # Duplicate Red Arrow
                                  texture = load_texture('Sprites/RedArrow.png'),
                                  z = -0.1,
                                  parent = camera.ui,
                                  visible = False)
-        self.WaitingForCodeBlocks = False
-        self.FirstTutorial = True
+        self.WaitingForCodeBlocks = False       # Changes input needed to advance Tutorial to K temporarily
+        self.FirstTutorial = True       # Tutorial dialogue is split into parts, every time Nosed One moves is another part
         self.SecondTutorial = False
         self.ThirdTutorial = False
         self.FourthTutorial = False
         self.FifthTutorial = False
-        self.IsSpeaking = False
-        self.SecretTutorial = False
-        self.SecretObtained = False
+        self.IsSpeaking = False     # True if Nosed One is currently speaking
+        self.SecretTutorial = False     # The Secret after tutorial has ended
+        self.SecretObtained = False     # True when no more available tutorials
 
     def update(self):
+        # Updates Dialogue visibility with self visibility, since Dialogue is not a child of self
         if not self.visible:
             self.Dialogue.visible = False
             return
         else:
             self.Dialogue.visible = True
-            self.IsSpeaking = True
+            self.IsSpeaking = True      # If self is visible, Nosed One is speaking
         
+        # Dialogue controller
         if self.FirstTutorial:
             if self.AdvanceDialogue == 0:
-                self.Dialogue.text = "Hello, I am TutorialGuy. \n Press Spacebar to continue."
-                self.scale = (0.4, 0.15)
-                self.position = (0, -0.2)
-                self.Dialogue.position = (-0.175, -0.175)
+                self.Dialogue.text = "Hello, I am the NosedOne. \n Press Z to continue."
+                self.scale = (0.5, 0.15)        # Ressizes Dialogue Box
+                self.position = (0, -0.2)       # Moves Dialogue box
+                self.Dialogue.position = (-0.175, -0.175)       # Moves Dialogue text
             elif self.AdvanceDialogue == 1:
                 self.Dialogue.text = "Keep in mind that you will not be able to interact with \nthe game while I am speaking."
                 self.scale = (0.7, 0.15)
@@ -86,10 +97,10 @@ class Tutorial(Entity):
                 self.scale = (0.7, 0.15)
                 self.position = (0.15, -0.2)
             elif self.AdvanceDialogue == 4:
-                self.Dialogue.text = ""
+                self.Dialogue.text = ""     # Blank text
                 self.visible = False
-                self.IsSpeaking = False
-                self.WaitingForCodeBlocks = True
+                self.IsSpeaking = False     # Nosed One pauses to let player open CodeBlocks menu
+                self.WaitingForCodeBlocks = True        # Nosed One is waiting for the CodeBlocks menu
             elif self.AdvanceDialogue == 5:
                 self.Dialogue.text = "This is the menu where you edit your CodeBlocks."
                 self.scale = (0.7, 0.08)
@@ -102,9 +113,9 @@ class Tutorial(Entity):
                 self.Dialogue.text = "This is a Code Snippet. \nCurrently it creates a key when you press E"
                 self.scale = (0.7, 0.15)
                 self.position = (0.4, -0.3)
-                self.RedCircle1.visible = True
-                self.RedCircle1.scale = (1.2, 0.5)
-                self.RedCircle1.position = (-0.3, 0.2)
+                self.RedCircle1.visible = True      # Red Circle for demonstrion purposes
+                self.RedCircle1.scale = (1.2, 0.5)      # Makes Red Circle huge
+                self.RedCircle1.position = (-0.3, 0.2)      # Moves Red Circle
                 self.Dialogue.position = (self.x - 0.3, self.y + 0.03)
             elif self.AdvanceDialogue == 8:
                 self.Dialogue.text = "The If block checks if\nthe following statement\nhas been met."
@@ -159,22 +170,24 @@ class Tutorial(Entity):
                 self.RedCircle1.visible = True
                 self.RedCircle1.position = (-0.1, 0.3)
                 self.RedCircle1.scale = (0.15, 0.15)
-                self.RedCircle2.visible = True
+                self.RedCircle2.visible = True      # Duplicate Red Circle
                 self.RedCircle2.position = (-0.1, 0.1)
                 self.RedCircle2.scale = (0.15, 0.15)
-                self.RedArrow1.visible = True
+                self.RedArrow1.visible = True       # Red Arrow
                 self.RedArrow1.position = (-0.2, 0.2)
                 self.RedArrow1.scale = (0.15, 0.15)
-                self.RedArrow2.visible = True
+                self.RedArrow2.visible = True       # Red Arrow Duplicate
                 self.RedArrow2.position = (0, 0.2)
                 self.RedArrow2.scale = (0.15, 0.15)
                 self.RedArrow2.rotation_z = 180
             elif self.AdvanceDialogue == 20:
-                self.Dialogue.text = "Always remember to place CodeBlocks over the top\nof the block to the left of it and let\nit snap."
+                self.Dialogue.text = "Always remember to place CodeBlocks over \nthe top of the block to the left \nand let it snap."
                 self.RedCircle1.visible = False
                 self.RedCircle2.visible = False
                 self.RedArrow1.visible = False
                 self.RedArrow2.visible = False
+            elif self.AdvanceDialogue == 20:
+                self.Dialogue.text = "And note that Snippets execute in order\nfrom top to bottom."
             elif self.AdvanceDialogue == 21:
                 self.Dialogue.text = "Once you're done, press Q to toggle executing\nthe snippets."
             elif self.AdvanceDialogue == 22:
@@ -184,7 +197,7 @@ class Tutorial(Entity):
             elif self.AdvanceDialogue == 24:
                 self.Dialogue.text = ""
                 self.visible = False
-                TutorialEntity.position = (19.5, 7.5)
+                TutorialEntity.position = (19.5, 8)
                 self.FirstTutorial = False
                 self.SecondTutorial = True
                 self.AdvanceDialogue = 0
@@ -211,7 +224,7 @@ class Tutorial(Entity):
                 self.IsSpeaking = False
                 self.ThirdTutorial = True
                 self.AdvanceDialogue = 0
-                TutorialEntity.position = (33, 1.5)
+                TutorialEntity.position = (33, 2)
         elif self.ThirdTutorial:
             if self.AdvanceDialogue == 0:
                 self.Dialogue.text = "Oh no an enemy!"
@@ -243,7 +256,7 @@ class Tutorial(Entity):
                 self.visible = False
                 self.ThirdTutorial = False
                 self.FourthTutorial  = True
-                TutorialEntity.position = (58, 1.5)
+                TutorialEntity.position = (58, 2)
                 self.IsSpeaking = False
         elif self.FourthTutorial:
             if self.AdvanceDialogue == 0:
@@ -262,7 +275,7 @@ class Tutorial(Entity):
                 self.visible = False
                 self.FifthTutorial = True
                 self.FourthTutorial  = False
-                TutorialEntity.position = (58, 17.5)
+                TutorialEntity.position = (58, 18)
                 self.IsSpeaking = False
         elif self.FifthTutorial:
             if self.AdvanceDialogue == 0:
@@ -270,33 +283,48 @@ class Tutorial(Entity):
             elif self.AdvanceDialogue == 1:
                 self.Dialogue.text = "You have completed the Tutorial!"
             elif self.AdvanceDialogue == 2:
-                self.Dialogue.text = "I have a secret for those who pay attention.\nReturn to the first room..."
+                self.Dialogue.text = "There also happens to be a Boss Summoner here!"
+                self.RedCircle1.visible = True
             elif self.AdvanceDialogue == 3:
-                self.Dialogue.text = "Remember, you can press P while in the CodeBlocks\nmenu to open the CodeBlocks guide if you need help."
+                self.Dialogue.text = "Bosses can drop Rare CodeBlocks, as well as\na portal that takes you to a different\narea!"
+                self.RedCircle1.visible = False
             elif self.AdvanceDialogue == 4:
+                self.Dialogue.text = "However they are harder to fight than regular\nenemies and will trap you in the room."
+            elif self.AdvanceDialogue == 5:
+                self.Dialogue.text = "But you don't have a way to hurt it, so it's\ncertain death if you fight it now!..\nUnless..."
+            elif self.AdvanceDialogue == 6:
+                self.Dialogue.text = "If you're reading this...\n...Return to the first room...\nI may have something of use to you..."
+            elif self.AdvanceDialogue == 7:
+                self.Dialogue.text = "Remember, you can press P while in the \nCodeBlocks menu to open the CodeBlocks \nguide if you need help."
+            elif self.AdvanceDialogue == 8:
                 self.Dialogue.text = ""
                 self.AdvanceDialogue = 0
                 self.visible = False
                 self.FifthTutorial = False
                 self.SecretTutorial = True
-                TutorialEntity.position = (5.5, 3.5)
+                TutorialEntity.position = (5.5, 4)
                 self.IsSpeaking = False
         elif self.SecretTutorial:
             if self.AdvanceDialogue == 0:
-                self.Dialogue.text = "For those who pay attention..."
+                self.Dialogue.text = "Thank you for listening to the tutorial."
             elif self.AdvanceDialogue == 1:
-                self.Dialogue.text = "...the forbidden one is yours."
+                self.Dialogue.text = "..."
             elif self.AdvanceDialogue == 2:
+                self.Dialogue.text = "Take him."
+            elif self.AdvanceDialogue == 3:
+                self.Dialogue.text = "The forbidden one is yours."
+            elif self.AdvanceDialogue == 4:
                 self.Dialogue.text = ""
                 self.AdvanceDialogue = 0
                 self.visible = False
                 self.SecretTutorial  = False
                 TutorialEntity.enabled = False
                 self.IsSpeaking = False
-                self.SecretObtained = True
+                self.SecretObtained = True      # Gives player Secret CodeBlock
 
 
     def input(self, key):
+        # Advances and opens dialogue if K is pressed rather than Z while WaitingForCodeBlocks
         if key == 'k' and self.WaitingForCodeBlocks:
             self.visible = True
             self.AdvanceDialogue += 1
@@ -305,7 +333,9 @@ class Tutorial(Entity):
         if not self.visible:
             return
         
-        if key == 'space' and not self.WaitingForCodeBlocks:
+        # Progress Dialogue if Nosed One is speaking
+        if key == 'z' and self.IsSpeaking and not self.WaitingForCodeBlocks:
             self.AdvanceDialogue += 1
     
-TutorialGuy = Tutorial()
+TutorialGuy = Tutorial()        # Creates an object to control Tutorial, TutorialGuy was a placeholder for Nosed One that I'm not bothered to go through all my code and update the name for
+

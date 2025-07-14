@@ -1,21 +1,20 @@
-CodeBlocks/if.png,if |
-CodeBlocks/colon.png,:\n    |
-CodeBlocks/True.png,True|
-CodeBlocks/False.png,False|
-CodeBlocks/closebracket.png,)|
-CodeBlocks/openbracket.png,(|
-CodeBlocks/smile.png,"Smiley Face"|
-CodeBlocks/+.png,+|
-CodeBlocks/1.png,1|
-CodeBlocks/space.png, |
-CodeBlocks/=.png,=|
-CodeBlocks/-.png,-|
-CodeBlocks/asterisk.png,*|
-CodeBlocks/block.png,ExecutedEntities.append(FireableBlock(|
-CodeBlocks/divide.png,/|
-CodeBlocks/EKey.png,key == 'e'|
-CodeBlocks/Fkey.png,key == 'f'|
-CodeBlocks/make.png,'make'))|
-CodeBlocks/fire.png,ExecutedEntities.append(FireableFire(|
-CodeBlocks/Key.png,ExecutedEntities.append(FireableKey(|
-CodeBlocks/shoot.png,'shoot'))|
+CodeBlocks/if.png,,if |
+CodeBlocks/colon.png,,:\n    |
+CodeBlocks/True.png,,True|
+CodeBlocks/False.png,,False|
+CodeBlocks/closebracket.png,,)|
+CodeBlocks/openbracket.png,,(|
+CodeBlocks/+.png,,+|
+CodeBlocks/1.png,,1|
+CodeBlocks/=.png,,=|
+CodeBlocks/-.png,,-|
+CodeBlocks/asterisk.png,,*|
+CodeBlocks/block.png,,ExecutedEntities.append(FireableBlock(|
+CodeBlocks/divide.png,,/|
+CodeBlocks/make.png,,modification = 'make'))|
+CodeBlocks/Key.png,,ExecutedEntities.append(FireableKey(|
+CodeBlocks/comma.png,,, |
+CodeBlocks/1point5.png,,1.5|
+CodeBlocks/5.png,,5|
+CodeBlocks/10.png,,10|
+CodeBlocks/speed.png,,speed|
