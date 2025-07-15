@@ -34,6 +34,7 @@ I did not make any of the audio, credits below
 When you go into a portal, wait a bit before loading rooms or they might not load at all, I'm just going to say this is on purpose and it's portal sickness
 If there is a boss spawner on top of a portal, the boss will just camp the portal until you come back (this definately did NOT happen to me)
 If there are 2 portals in the same room, I can't guarentee going through them is a good idea (I actually haven't tried this)
+If your monitor aspect ratio isn't 16:9 it will break things, you can change your display resolution to a 16:9 aspect ratio and that will probably fix it
 Dev highscore is 100 damage, 53 rooms :)
 
 TitleScreen Theme - https://www.youtube.com/watch?v=nR-4kGHCjMM
