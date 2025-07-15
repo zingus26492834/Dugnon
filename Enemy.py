@@ -297,9 +297,7 @@ class BossEnemy(Entity):
                 self.jumping = False        # End jump
         
         if self.speed > 5:      # If speed if above 5
-            self.speed * 0.8        # Lower speed
-            if self.speed < 5:     # If speed is below 5
-                self.speed = 5      # make speed 5
+            self.speed = 5      # Cap speed at 5
         
         # If health below 0, boss dies, drops codeblocks, summons portal, unlocks room
         if self.health <= 0:
@@ -313,7 +311,7 @@ class BossEnemy(Entity):
             self.collider = None
         
 
-        self.healthbar.scale_x = self.health / 100      # Healthbar length is scaled with self health
+        self.healthbar.scale_x = self.health / 300      # Healthbar length is scaled with self health
 
         # If boss is far enough from screen, start doing damage, makes sure the boss doesnt softlock player by glitching out of the level
         if self.y < camera.world_position.y - 15 or self.y > camera.world_position.y + 15 or self.x < camera.world_position.x - 30 or self.x > camera.world_position.x + 30:
@@ -421,7 +419,7 @@ class StationaryBossEnemy(Entity):
             self.collider = None
         
 
-        self.healthbar.scale_x = self.health / 100
+        self.healthbar.scale_x = self.health / 200
         if self.y < camera.world_position.y - 15 or self.y > camera.world_position.y + 15 or self.x < camera.world_position.x - 30 or self.x > camera.world_position.x + 30:
             self.health -= 10
 
@@ -443,7 +441,7 @@ class FloatingBoss(Entity):
                          collider = 'box',
                          texture = load_texture('Sprites/Enemy/SkullBoss.png'),
                          **kwargs)
-        self.health = 100
+        self.health = 300
         self.dh = 0         # Difference in health
         self.Enemy = True
         self.playercollision = False
@@ -530,7 +528,7 @@ class FloatingBoss(Entity):
         self.xaccel = cos(angle)        # Actually not sure if these 2 do anything
         self.yaccel = sin(angle)
 
-        self.healthbar.scale_x = self.health / 100
+        self.healthbar.scale_x = self.health / 300
         if self.y < camera.world_position.y - 15 or self.y > camera.world_position.y + 15 or self.x < camera.world_position.x - 30 or self.x > camera.world_position.x + 30:
             self.health -= 10
 

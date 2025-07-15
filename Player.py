@@ -9,8 +9,7 @@ class Player(Entity):
         super().__init__(model = 'quad', 
                          color = color.rgba(0, 0, 0, 0),
                          scale = (1,1,1),
-                         collider = 'box'
-                         )
+                         collider = 'box')
         self.velocity = 0       # Velocity is movement direction, 1 is left, -1 is right
         self.gravity = 1        # Controls speed player is pulled down
         self.grounded = True    # Certain things only happen while player is grounded
@@ -39,7 +38,8 @@ class Player(Entity):
         self.dy = 0     # Difference in y coord
         self.animationplaying = ''      # Current animation playing
         self.jumpaudio = Audio('Audio/Jump.mp3', loop = False, autoplay = False, volume = 0.2)      # Jump audio
-
+        self.healthbar = Entity(model = 'quad', color = color.red, parent = camera.ui, scale = (0.5, 0.02), origin = (0.5, 0), position = (0.9, 0.3, 0.05), visible = False)
+        self.healthbackground = Entity(model = 'quad', color = color.black, parent = camera.ui, scale = (0.5, 0.02), origin = (0.5, 0), position = (0.9, 0.3, 0.1), visible = False)
         # Not sure why this is here but i don't want to remove it and find out the hard way
         ray = raycast(self.world_position, 
                       self.down, 
@@ -137,6 +137,8 @@ class Player(Entity):
             self.hurtaudio.play()       # play hurt audio
         self.dh = self.health
 
+        self.healthbar.scale_x = self.health / 100 * 0.5
+
         # Updates animations
         self.Animate()
 
@@ -213,6 +215,7 @@ class Player(Entity):
         animation = SpriteSheetAnimation('Sprites/Player/PlayerSheet.png', tileset_size=(9,1), fps = 10, animations={'idle' : ((0, 0), (1, 0)), 'jump' : ((1, 0), (2,0)), 'rising' : ((2, 0), (2, 0)), 'stalling' : ((3, 0), (3, 0)), 'fall' : ((3, 0), (4, 0)), 'falling' : ((4, 0), (4, 0)), 'walking' : ((5, 0), (8, 0))}, double_sided = True)
         animation.scale = 2
         animation.play_animation('idle')
+        animation.z -= 0.01     # Helps prevent z fighting
         return animation
     
     # Controls player animations  

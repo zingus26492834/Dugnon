@@ -31,8 +31,12 @@ Take screenshots of any bugs, cool snippets, etc. while playing the game for the
 Feedback form - https://forms.gle/dZyNVbkYS5LxEysq5
 Also having the game console (so if you ran it from command line it would be the command line) open might help you, and if it screams at you that there is a debug statement please take a screenshot if you can
 I did not make any of the audio, credits below
+When you go into a portal, wait a bit before loading rooms or they might not load at all, I'm just going to say this is on purpose and it's portal sickness
+If there is a boss spawner on top of a portal, the boss will just camp the portal until you come back (this definately did NOT happen to me)
+If there are 2 portals in the same room, I can't guarentee going through them is a good idea (I actually haven't tried this)
+Dev highscore is 100 damage, 53 rooms :)
 
-TitleScreen Theme - https://www.youtube.com/watch?v=GKlAHqsiG1w
+TitleScreen Theme - https://www.youtube.com/watch?v=nR-4kGHCjMM
 Main Theme - https://www.youtube.com/watch?v=swTx0bY9anw&list=PLysDEbJjdAUMou7Fsx33nbMpCW3KnJdBd&index=19
 Boss Theme - https://www.youtube.com/watch?v=8uOPuu5HDws&list=PLysDEbJjdAUMou7Fsx33nbMpCW3KnJdBd&index=20
 Non Scary Main Theme - https://www.youtube.com/watch?v=DstO9slC_5U&list=PLKXdyINOQYsaHwm4rJ0QDFzsaZQNQjF0U&index=26

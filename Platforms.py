@@ -106,11 +106,12 @@ with open('Levels/RightLevels.txt') as f:
                 RightLevels.append(line.strip())
 
 # Generate Random Level, levels will very often make or not make entrances/exits where needs to have/not have one. It's complicated and not necessary to fix, just makes the UX more annoying, besides I have no idea why it's happening
-def RandomLevel(direction, x, y, chunkx, chunky, portals = True):
+def RandomLevel(direction, x, y, chunkx, chunky, portals = True, **kwargs):
     LeftChunk = (chunkx - 1, chunky)    # Chunk to the left
     RightChunk = (chunkx + 1, chunky)   # Chunk to the right
     UpChunk = (chunkx, chunky + 1)      # Chunk above
     DownChunk = (chunkx, chunky - 1)    # Chunk below
+    extraargs = {**kwargs}
 
     required_direction = set()          # Set list for exits needed for level
     forbidden_directions = set()        # Set list for exits level can't have
@@ -160,7 +161,7 @@ def RandomLevel(direction, x, y, chunkx, chunky, portals = True):
          if random.randint(1, 30) == 1:      # 1/30 chance to make portal
                SummonPortal(x + 13, y + 10, chunkx, chunky)
 
-    return make_level(texture, x, y, chunkx, chunky)
+    return make_level(texture, x, y, chunkx, chunky, **extraargs)
 
 # Finds all the entrances for given level
 def GetEntrances(Level):

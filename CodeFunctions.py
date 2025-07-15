@@ -456,12 +456,12 @@ def SummonPortal(x, y, chunkx, chunky, colour = 'default', scale = 1, **kwargs):
                      chunky = ExitChunkY,
                      collider = 'box',
                      Generated = False,
-                     z = -0.1,
                      GenerateCoordX = ExitLocationX,
                      GenerateCoordY = ExitLocationY)
      entryportalanimation = CreateAnimation('portal')
      entryportalanimation.color = color.rgb(r, g, b)
      entryportalanimation.parent = EntryPortal
+     entryportalanimation.z += 0.05     # Pushes sprite behind other sprites to prevent z fighting
      ExitPortal = Entity(position = (ExitLocationX + 13, ExitLocationY + 10),
                          model = 'quad',
                          scale = (2, 2),
@@ -470,11 +470,11 @@ def SummonPortal(x, y, chunkx, chunky, colour = 'default', scale = 1, **kwargs):
                          despawnable = True,
                          chunkx = chunkx,
                          chunky = chunky,
-                         z = -0.1,
                          collider = 'box')
      exitportalanimation = CreateAnimation('portal')
      exitportalanimation.color = color.rgb(r, g, b)
      exitportalanimation.parent = ExitPortal
+     exitportalanimation.z == 0.05
      EntryPortal.destination = ExitPortal.position      # portal destinations are set to each other
      ExitPortal.destination = EntryPortal.position
      if scaleoverride != 0:

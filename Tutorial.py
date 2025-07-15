@@ -15,6 +15,7 @@ animation = SpriteSheetAnimation('Sprites/NosedOne/NosedOneSheet.png', tileset_s
 animation.scale = 1
 animation.play_animation('spin')
 animation.parent = TutorialEntity       # Parent Animation to TutorialEntity
+animation.z += 0.01
 
 # Class to control all Tutorial Dialogue and UI
 class Tutorial(Entity):
@@ -191,10 +192,14 @@ class Tutorial(Entity):
             elif self.AdvanceDialogue == 21:
                 self.Dialogue.text = "Once you're done, press Q to toggle executing\nthe snippets."
             elif self.AdvanceDialogue == 22:
-                self.Dialogue.text = "You can also press K to toggle the menu if you\nwant."
+                self.Dialogue.text = "If you're executing code, the light at the top\nleft will be green."
             elif self.AdvanceDialogue == 23:
-                self.Dialogue.text = "I will meet you at the top of this ledge when\nyou're done."
+                self.Dialogue.text = "You can also press K to toggle the menu again if \nyou want."
             elif self.AdvanceDialogue == 24:
+                self.Dialogue.text = "If you want to see the actual code being\nexecuted, press O to toggle the console."
+            elif self.AdvanceDialogue == 25:
+                self.Dialogue.text = "I will meet you at the top of this ledge when\nyou're done."
+            elif self.AdvanceDialogue == 26:
                 self.Dialogue.text = ""
                 self.visible = False
                 TutorialEntity.position = (19.5, 8)

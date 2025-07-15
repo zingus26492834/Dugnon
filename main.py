@@ -81,9 +81,24 @@ def input(key):
         if CodeBlocksEnabled:       # If codeblocks ui is open
             CodeBlocksGuide.visible = not CodeBlocksGuide.visible       # CodeBlocks Guide is toggled
 
+    # Open fake console
+    if key == 'o':
+        if CodeBlocksEnabled:
+            updatedposition = cbpe.get_relative_point(camera.ui, mouse.position)
+            CodeDisplayBackground.position = (updatedposition.x, updatedposition.y)
+            # Fix positions of Display text and Display Border
+            CodeDisplay.position = (CodeDisplayBackground.x - CodeDisplayBackground.scale_x / 2 + 0.02, CodeDisplayBackground.y + CodeDisplayBackground.scale_y / 2 - 0.2 * CodeDisplayBackground.scale_y)
+            CodeDisplayBorder.position = (CodeDisplayBackground.x, CodeDisplayBackground.y)
+            CodeDisplay.visible = not CodeDisplay.visible       # CodeDisplay is toggled
+            CodeDisplayBackground.visible = CodeDisplay.visible     # Code display box is set to visibility of codedisplay
+            CodeDisplayBorder.visible = CodeDisplay.visible     # Border is also set to visibility of codedisplay
+
     # This needs to be here to read keyboard inputs, however does not normally run every frame (check update func)
     if executing:
         execute(key)
+        ExecutingLight.color = color.green
+    else:
+        ExecutingLight.color = color.red
 
     # Interactions
     for B in BossSpawners:
@@ -102,13 +117,13 @@ def input(key):
     if player.intersects(TutorialEntity) and TutorialEntity.enabled and key == 'z':     # If player is touching NosedOne and presses z
         TutorialGuy.visible = True
 
-    global warpcooldown, warping, cright_edge, ctop_edge, cleft_edge, cbottom_edge, CameraEdges
+    global warpcooldown, warping, cright_edge, ctop_edge, cleft_edge, cbottom_edge, CameraEdges, chunkx, chunky
     for portal in EntryPortals:
         if player.intersects(portal) and warpcooldown < time.time() and key == 'z':     # If player is touching portal and presses z
             warping = True
             if not portal.Generated:        # If level hasn't already been generated
                 CheckChunk(portal.chunkx, portal.chunky)        # Chunk has been loaded
-                RandomLevel('down', portal.GenerateCoordX, portal.GenerateCoordY, portal.chunkx, portal.chunky, portals = False)        # Create Random level on other side of portal
+                RandomLevel('down', portal.GenerateCoordX, portal.GenerateCoordY, portal.chunkx, portal.chunky, portals = False, bossdisable = True, disableenemy = True)        # Create Random level on other side of portal
                 portal.Generated = True
             player.position = portal.destination        # Move player to other side of portal
             camera.position = (portal.destination.x, portal.destination.y - 2)      # Move camera to other side of portal
@@ -118,7 +133,7 @@ def input(key):
             cright_edge, ctop_edge, cleft_edge, cbottom_edge = CameraEdges
             chunkx = portal.chunkx      # Set chunkx to portal's chunkx
             chunky = portal.chunky      # Set chunky to portal's chunky
-            warpcooldown = time.time() + 5
+            warpcooldown = time.time() + 0.1
     for portal in ExitPortals:
         if player.intersects(portal) and warpcooldown < time.time() and key == 'z':
             warping = True
@@ -131,7 +146,7 @@ def input(key):
             cright_edge, ctop_edge, cleft_edge, cbottom_edge = CameraEdges
             chunkx = portal.chunkx
             chunky = portal.chunky
-            warpcooldown = time.time() + 5
+            warpcooldown = time.time() + 0.1
 
 
 ################################################################################
@@ -143,14 +158,16 @@ incrementchunk = False
 keynotification = False
 hired = False
 alreadyhired = False
+stucktimer = 0
 blackouttimer = 0
+stuckcount = 0
 keycolour = 'regular'
 CodeBlockPickup = Audio('Audio/CodeBlock.mp3', loop = False, autoplay = False, volume = 0.3)
 keymessage = Text(text = f'You need a {keycolour} key to open this door', origin = (0, -3), scale = 2, visible = False, parent = camera.ui)
 MouseCheck = Entity(model = 'quad', scale = (100, 100, 0.1), position = (0, 0), color = color.rgba(0, 0, 0, 0), z = 2, collider = 'box', playercollision = False)
 # Update Function, runs every tick
 def update():
-    global titlescreen, warping, HighestRunDamage, HighestRunRooms
+    global titlescreen, warping, HighestRunDamage, HighestRunRooms, stuckcount, stucktimer
     if titlescreen:
         return      # Skip update loop if on titlescreen
     
@@ -187,15 +204,17 @@ def update():
         if not CheckChunk(chunkx, chunky):
             RandomLevel('right', cright_edge, cbottom_edge, chunkx, chunky)
             HighestRunRooms += 1        # Increase HighestRunRooms
+            stuckcount += 1
         # Until camera has reached the new position, slide it towards that point
         if camera.x < newcamerapos - (width / 2):
             camera.x += time.dt * 40
         else:
             camera.x = newcamerapos - (width / 2)       # Snap camera to the new position, in case it moved too far
-            player.position.x = cright_edge + 2     # Places the player on the new screen
             CameraEdges = GetCameraEdges()      # Checks new Camera Edges
+            player.position.x = cleft_edge + 2     # Places the player on the new screen
             player.gravity = 1      # Reenables gravity for the player
             incrementchunk = False      # Sets up for next chunk to be loaded
+            print(chunkx, chunky)
 
     # Top edge
     if player.position.y >= ctop_edge and not warping:       # If player moves above the top of the screen
@@ -210,15 +229,17 @@ def update():
         if not CheckChunk(chunkx, chunky):
             RandomLevel('up', cleft_edge, ctop_edge, chunkx, chunky)
             HighestRunRooms += 1        # Increase HighestRunRooms
+            stuckcount += 1
         # Until camera has reached the new position, slide it towards that point
         if camera.y < newcamerapos - (height / 2):
             camera.y += time.dt * 40
         else:
             camera.y = newcamerapos - (height / 2)      # Snap camera to the new position, in case it moved too far
-            player.position.y = ctop_edge + 15       # Places the player on the new screen
             CameraEdges = GetCameraEdges()      # Checks new Camera Edges
+            player.position.y = cbottom_edge + 15       # Places the player on the new screen
             player.gravity = 1      # Reenables gravity for the player
             incrementchunk = False      # Sets up for next chunk to be loaded
+            print(chunkx, chunky)
                 
 
     # Left edge
@@ -234,15 +255,17 @@ def update():
         if not CheckChunk(chunkx, chunky):
             RandomLevel('left', cleft_edge - width, cbottom_edge, chunkx, chunky)
             HighestRunRooms += 1        # Increase HighestRunRooms
+            stuckcount += 1
         # Until camera has reached the new position, slide it towards that point
         if camera.x > newcamerapos + (width / 2):
             camera.x -= time.dt * 40
         else:
             camera.x = newcamerapos + (width / 2)       # Snap camera to the new position, in case it moved too far
-            player.position.x = cleft_edge - 2      # Places the player on the new screen
             CameraEdges = GetCameraEdges()      # Checks new Camera Edges
+            player.position.x = cright_edge - 2      # Places the player on the new screen
             player.gravity = 1      # Reenables gravity for the player
             incrementchunk = False      # Sets up for next chunk to be loaded
+            print(chunkx, chunky)
     # Bottom edge
     if player.position.y <= cbottom_edge and not warping:       # If player moves below the bottom of the screen
         newcamerapos = cbottom_edge - height        # New camera position is 1 screen below
@@ -256,15 +279,17 @@ def update():
         if not CheckChunk(chunkx, chunky):
             RandomLevel('down', cleft_edge, cbottom_edge - height, chunkx, chunky)
             HighestRunRooms += 1        # Increase HighestRunRooms
+            stuckcount += 1
         # Until camera has reached the new position, slide it towards that point
         if camera.y > newcamerapos + (height / 2):
             camera.y -= time.dt * 40
         else:
             camera.y = newcamerapos + (height / 2)      # Snap camera to the new position, in case it moved too far
-            player.position.y = cbottom_edge - 8        # Places the player on the new screen
             CameraEdges = GetCameraEdges()      # Checks new Camera Edges
+            player.position.y = ctop_edge - 8        # Places the player on the new screen
             player.gravity = 1      # Reenables gravity for the player
             incrementchunk = False      # Sets up for next chunk to be loaded
+            print(chunkx, chunky)
 
     # Unstuck player if spam a w d, more context in player.py
     if player.spaceescape >= 5 and player.aescape >= 5 and player.descape >= 5 and player.position == player.stuckpos:
@@ -390,7 +415,7 @@ def update():
                 a.spawntime -= 100      # executed entity spawntime - 100 (basically a force despawn but cleaner)
                 if a.damage > HighestRunDamage:     # If executed entity's damage is the highest so far in the run
                     HighestRunDamage = a.damage     # Damage is the new run's highest
-                if a.damage > 100000:       # If executed entity's damage is above 100k
+                if a.damage > 100:       # If executed entity's damage is above 100
                     hired = True        # Hired
 
     # Solves problem of execute not running every frame by called input function every frame regrdless of input
@@ -484,7 +509,13 @@ def update():
             warping = False
             player.gravity = 1
 
-
+    # Stop player getting stuck between transitions
+    if time.time() - stucktimer > 5:
+        stucktimer = time.time() + 5
+        if stuckcount > 3:
+            player.x += 5
+        stuckcount = 0
+    
     global blackouttimer, alreadyhired
     # Hired
     if hired:
@@ -530,6 +561,9 @@ def start():
     player.enabled = True
     player.health = 100
     player.dead = False
+    ExecutingLight.visible = True
+    player.healthbar.visible = True
+    player.healthbackground.visible = True
     # Start game / Load tutorial levels, load tutorial codeblock items
     make_level(load_texture('Levels/platformer_tutorial_level'), 2, 0, 0, 0, randomdoors = False)        # Creates the tutorial level / starting room
     player.y += 2       # Makes sure the player doesn't get stuck in the ground
@@ -661,5 +695,6 @@ DmanMessage = Text(text = 'YOU ARE HIRED!!\n\nOR I AM HIRED???', scale = 2, posi
 DMan.enabled = False
 DmanMessage.enabled = False
 blackout.enabled = False
+ExecutingLight = Entity(model = 'sphere', color = color.red, parent = camera.ui, position = (-0.75, 0.45), scale = (0.05, 0.05), visible = False)
 
 app.run()      # Starts the game

@@ -60,6 +60,10 @@ class CodeBlock(Button):
                     
 
 ExecutedEntities = []
+# Displays for code in game
+CodeDisplay = Text(text = 'Press Q', z = -0.4, color = color.green, parent = cbpe, visible = False)
+CodeDisplayBackground = Entity(model = 'quad', color = color.black, scale = (0.1, 0.1), z = -0.3, parent = cbpe, visible = False)
+CodeDisplayBorder = Entity(model = 'quad', color = color.white, scale = (0.1, 0.1), z = -0.1, parent = cbpe, visible = False)
 # Function to execute code blocks
 def execute(key = None, **kwargs):
         blockgroups = []
@@ -93,16 +97,36 @@ def execute(key = None, **kwargs):
 
         # Executes groups
         noexecutedgroups = 0
+        CodeTrueDisplay = []
         for i, group in enumerate(blockgroups):     # Ensures each group is executed in order
             if len(group) > 2:      # Excludes groups with 2 or less blocks
-                noexecutedgroups += 1
-                print(f"Group {noexecutedgroups}:")        # Displays which group is being executed
+                noexecutedgroups += 1       # Counter to group snippets that are more than 2 blocks
                 executedcode = ''.join([block.code for block in group])     # Joins code to be functional (if blocks are correctly ordered)
-                print(executedcode)     # Displays code that will be executed
+                GroupInDisplay = (f'Group {noexecutedgroups}:')     # Creates a variable for display purposes showing which group is being executed
+                CodeTrueDisplay.append(GroupInDisplay)      # Adds display to the list to be displayed
+                CodeInDisplay = executedcode.split('\n')        # Creates a different variable that seperates code by line for display
+                CodeTrueDisplay.extend(CodeInDisplay)       # Since above variable can be a list, extend adds each part of the list rather than the list itself, to the list to be displayed
                 try:        # Prevents crashing if code is incorrect
                     exec(executedcode, ExecuteArgs, **kwargs)      # Executes code, adding kwargs from function
                 except Exception as e:
-                    print(f"Error: {e}")        # Displays what went wrong if code is incorrect
+                    CodeTrueDisplay.append(e)       # Display exception to help player understand what is going wrong
+        Lines = 0       # Empty variable for ccounting lines
+        for line in CodeTrueDisplay:        # Count amt of lines to be displayed
+            Lines += 1
+        CodeTrueDisplay = '\n'.join(str(line) for line in CodeTrueDisplay)      # Add \n to the end of each line to make it take a new line for display, also convert it all to string since exception is it's own datatype
+        print(CodeTrueDisplay)      # The old way of debugging your own code, it now displays in game but just in case I'll leave this here
+        CodeDisplay.text = CodeTrueDisplay      # Update display text
+        CodeDisplayBackground.scale_y = 0.04 * Lines        # Scale display height with amt of lines
+        CodeLength = 0      # Empty variable for longest line
+        for line in CodeTrueDisplay.split('\n'):        # Check every line in display, since I'm checking len here I need it to be a string and therefore couldn't have done it with the line counter above
+            CodeLength = max(CodeLength, len(line))     # If this line is the longest line, set codelength to this line
+        CodeDisplayBackground.scale_x = 0.012 * CodeLength      # Scale display width with longest line
+        # Set display text position to ~top left of display box since the origin of the text is it's top left corner
+        CodeDisplay.position = (CodeDisplayBackground.x - CodeDisplayBackground.scale_x / 2 + 0.02, CodeDisplayBackground.y + CodeDisplayBackground.scale_y / 2 - 0.2 * CodeDisplayBackground.scale_y)
+        # Fix border of code display box to match updated display box
+        CodeDisplayBorder.scale = (CodeDisplayBackground.scale_x + 0.02, CodeDisplayBackground.scale_y + 0.02)
+        # Move border behind display
+        CodeDisplayBorder.position = (CodeDisplayBackground.x, CodeDisplayBackground.y)
 
 # Make list of all codeblocks that can be generated
 def CodeBlocksList():
