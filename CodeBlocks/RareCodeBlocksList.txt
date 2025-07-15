@@ -13,7 +13,7 @@ CodeBlocks/health.png,,health|
 CodeBlocks/100.png,, 100 |
 CodeBlocks/GKey.png,,key == 'g'|
 CodeBlocks/RKey.png,,key == 'r'|
-CodeBlocks/HKey.png,,key == 'e'|
+CodeBlocks/HKey.png,,key == 'h'|
 CodeBlocks/TKey.png,,key == 't'|
 CodeBlocks/laser.png,,ExecutedEntities.append(FireableLaser(|
 CodeBlocks/JumpHeight.png,,jumpheight|

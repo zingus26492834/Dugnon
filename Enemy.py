@@ -449,7 +449,6 @@ class FloatingBoss(Entity):
         self.despawnable = True
         self.dead = False
         self.speed = 5
-        self.LockRoom = True
         self.spawntime = spawntime
         self.healthbar = Entity(model = 'quad',
                                 color = color.red,
