@@ -1,6 +1,6 @@
 # Imports
 from ursina import *
-app = Ursina()      # Initialising Ursina before the following files is necessary
+app = Ursina(forced_aspect_ratio = 1.6)      # Initialising Ursina before the following files is necessary
 from CodeBlocks import *
 from Platforms import *
 from Player import *
