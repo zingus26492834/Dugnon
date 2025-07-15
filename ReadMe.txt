@@ -28,7 +28,7 @@ Note
 ================================
 Note that this game is not finished so if it looks bad that's why. It should be mostly functional and bug free I hope
 Take screenshots of any bugs, cool snippets, etc. while playing the game for the form please
-Feedback form - https://forms.gle/dZyNVbkYS5LxEysq5
+Feedback form - https://docs.google.com/forms/d/e/1FAIpQLSd9EGmUl58eWN2V68lZc1PxawtpeYdU8SQqC4Qw1Wlpa4OChg/viewform?usp=header
 Also having the game console (so if you ran it from command line it would be the command line) open might help you, and if it screams at you that there is a debug statement please take a screenshot if you can
 I did not make any of the audio, credits below
 When you go into a portal, wait a bit before loading rooms or they might not load at all, I'm just going to say this is on purpose and it's portal sickness
