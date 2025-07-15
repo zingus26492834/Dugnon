@@ -23,10 +23,16 @@ Otherwise if that doesn't work:
 - If you don't use windows you'll probably have to look up how to open it if none of that works
 - Anywhere I say to write "python _____" in command line, you can try replacing it with "python3 ____" or "py ____" if it doesn't work
 
+For Mac
+===============================
+If RunGameMac.command doesn't work:
+1. press Command + Space and type "Terminal"
+2. Install dependencies with "python3 -m pip install ____" (You will need python before this step)
+3. Navigate to the folder the game is in using terminal (Look up how to navigate files in mac terminal)
+4. Write "python3 main.py"
 
 Note
 ================================
-Note that this game is not finished so if it looks bad that's why. It should be mostly functional and bug free I hope
 Take screenshots of any bugs, cool snippets, etc. while playing the game for the form please
 Feedback form - https://docs.google.com/forms/d/e/1FAIpQLSd9EGmUl58eWN2V68lZc1PxawtpeYdU8SQqC4Qw1Wlpa4OChg/viewform?usp=header
 Also having the game console (so if you ran it from command line it would be the command line) open might help you, and if it screams at you that there is a debug statement please take a screenshot if you can
