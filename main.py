@@ -545,11 +545,17 @@ def update():
                 player.gravity = 1
                 CurrentCodeBlocks.append(CodeBlock(texture = 'CodeBlocks/HiredOne.png', code = "ExecutedEntities.append(HiredOne(", visible = False))       # Add HiredOne Block
 
+    global AudioToggle
+    if not AudioToggle:
+        DisableSound(AudioToggle)
+    
+        
 
 ################################################################################
 
 CameraEdges = GetCameraEdges()      # Finds edges of the starting screen
 cright_edge, ctop_edge, cleft_edge, cbottom_edge = CameraEdges
+AudioToggle = True
 
 # Load Tutorial and initial variables
 def start():
@@ -599,6 +605,7 @@ def start():
     # Disable TitleScreen
     TitleSplash.enabled = False
     StartButton.enabled = False
+    AudioToggleButton.enabled = False
     # Create TutorialGuy
     TutorialEntity.enabled = True
     # Create Tutorial Messages
@@ -622,8 +629,10 @@ ScaryButton = Button(text = 'Toggle Scary', scale = (0.2, 0.1), position = (0, -
 ScaryButton.text_entity.color = color.black
 # Check Scary setting
 with open ('settings.txt', 'r') as scarysetting:
-    global scary
-    scary = scarysetting.read() == 'True'       # scarysetting.read() is a string not a boolean, scarysetting.read() == 'True' is a statement checking if the string is literally 'True', resulting in a boolean
+    settings = []
+    for line in scarysetting.readlines():
+        settings.append(line)
+    scary = settings[0] == 'True\n'       # scarysetting.read() is a string not a boolean, scarysetting.read() == 'True\n' is a statement checking if the string is literally 'True' (with a new line due to how the file is structured), resulting in a boolean
 if scary:
     ScaryButton.color = color.green     # Change button colour to green if scarymode enabled
     ScaryButton.highlight_color = color.green       # Highlight colour is different to button colour, need to set both
@@ -632,9 +641,9 @@ else:
     ScaryButton.highlight_color = color.gray
 # toggle ScarySetting
 def ScaryToggle():
-    global scary
+    global scary, AudioToggle
     with open ('settings.txt', 'w') as scarysetting:
-        scarysetting.write(f'{not scary}')
+        scarysetting.write(f'{not scary}\n{AudioToggle}')
         scary = not scary
         if scary:
             ScaryButton.color = color.green
@@ -648,11 +657,92 @@ ScaryButton.on_click = ScaryToggle      # Set ScaryButton to run ScaryToggle whe
 TitleTheme = Audio('Audio/Title.mp3', loop = True, autoplay= True)
 TitleSplash = Text(text = 'Dugnon', color = color.black, origin = (0,0), scale = 3, position = (0, 0.3))
 TitleBackground = Entity(model = 'quad', position = (15, 8), scale = (28, 17), texture = load_texture('Sprites/titlescreen.png'))
-StartButton = Button(text = 'Start', scale = (0.2, 0.1), position = (0, -0.1), color = color.blue)
+StartButton = Button(text = 'Start', scale = (0.2, 0.1), position = (0, 0.1), color = color.blue)
 
 StartButton.on_click = start
 ReturnButton = Button(text='Return to Title', scale = (0.2, 0.1), position = (0, -0.1), color = color.azure)
 DeathSplash = Text(text = 'You Dieded', origin = (0, 0), scale = 3, position = (0,0.3), color = color.red)
+
+# Sound toggle
+AudioToggleButton = Button(text = 'Toggle Audio', scale = (0.2, 0.1), position = (0, -0.1), color = color.green)
+AudioToggleButton.text_entity.color = color.black
+
+defaultcodeblockpickup = 9
+defaultbgm = 0
+defaulthiredone = 0
+defaultbosstheme = 0
+defaultjospep = 0
+defaultplayerdead = 0
+defaultplayerhurt = 0
+defaultplayerjump = 0
+defaulttitle = 0
+setdefaultaudio = False
+def DisableSound(AudioToggle):
+    global setdefaultaudio, defaultcodeblockpickup, defaultbgm, defaulthiredone, defaultbosstheme, defaultjospep, defaultplayerdead, defaultplayerhurt, defaultplayerjump, defaulttitle
+    if not setdefaultaudio:
+        defaultcodeblockpickup = CodeBlockPickup.volume
+        defaultbgm = bgm.volume
+        defaulthiredone = HiredOneAudio.volume
+        defaultbosstheme = bosstheme.volume
+        defaultjospep = JospepAudio.volume
+        defaultplayerdead = player.deadaudio.volume
+        defaultplayerhurt = player.hurtaudio.volume
+        defaultplayerjump = player.jumpaudio.volume
+        defaulttitle = TitleTheme.volume
+        for a in CodeFunctionsAudios:
+            a.defaultvolume = a.volume
+        setdefaultaudio = True
+    if not AudioToggle:
+        CodeBlockPickup.volume = 0
+        bgm.volume = 0
+        HiredOneAudio.volume = 0
+        bosstheme.volume = 0
+        JospepAudio.volume = 0
+        player.deadaudio.volume = 0
+        player.hurtaudio.volume = 0
+        player.jumpaudio.volume = 0
+        TitleTheme.volume = 0
+        for a in CodeFunctionsAudios:
+            a.volume = 0
+    else:
+        CodeBlockPickup.volume = defaultcodeblockpickup
+        bgm.volume = defaultbgm
+        HiredOneAudio.volume = defaulthiredone
+        bosstheme.volume = defaultbosstheme
+        JospepAudio.volume = defaultjospep
+        player.deadaudio.volume = defaultplayerdead
+        player.hurtaudio.volume = defaultplayerhurt
+        player.jumpaudio.volume = defaultplayerjump
+        TitleTheme.volume = defaulttitle
+        for a in CodeFunctionsAudios:
+            a.volume = a.defaultvolume
+
+with open ('settings.txt', 'r') as soundsetting:
+    settings = []
+    for line in soundsetting.readlines():
+        settings.append(line)
+    AudioToggle = settings[1] == 'True'       # scarysetting.read() is a string not a boolean, scarysetting.read() == 'True' is a statement checking if the string is literally 'True', resulting in a boolean
+if AudioToggle: 
+    AudioToggleButton.color = color.green     # Change button colour to green if scarymode enabled
+    AudioToggleButton.highlight_color = color.green       # Highlight colour is different to button colour, need to set both
+else:
+    AudioToggleButton.color = color.gray      # Change button colour to grey if scarymode dsabled
+    AudioToggleButton.highlight_color = color.gray
+def SoundToggle():
+    global scary, AudioToggle
+    with open ('settings.txt', 'w') as soundsetting:
+        soundsetting.write(f'{scary}\n{not AudioToggle}')
+        AudioToggle = not AudioToggle
+        if AudioToggle:
+            AudioToggleButton.color = color.green
+            AudioToggleButton.highlight_color = color.green
+        else:
+            AudioToggleButton.color = color.gray
+            AudioToggleButton.highlight_color = color.gray
+    DisableSound(AudioToggle)
+
+AudioToggleButton.on_click = SoundToggle
+    
 
 # Scores display
 HighestDamageDisplay = Text(text = f'Highest Damage: {HighestRunDamage}', origin = (0, 0), scale = 2, position = (0, 0), color = color.white)
@@ -696,5 +786,6 @@ DMan.enabled = False
 DmanMessage.enabled = False
 blackout.enabled = False
 ExecutingLight = Entity(model = 'sphere', color = color.red, parent = camera.ui, position = (-0.75, 0.45), scale = (0.05, 0.05), visible = False)
+DisableSound(AudioToggle)
 
 app.run()      # Starts the game

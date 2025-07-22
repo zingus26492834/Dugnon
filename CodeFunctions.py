@@ -4,7 +4,9 @@ from Player import *
 from math import *
 
 # Default codefunctions audio
+CodeFunctionsAudios = []
 CodeFunctionAudio = Audio('Audio/CodeFunction.mp3', loop = False, autoplay = False, volume = 0.3)
+CodeFunctionsAudios.append(CodeFunctionAudio)
 
 ExistingBlocks = []     # Blocks list
 # Block codefunction
@@ -81,6 +83,7 @@ def FireableBlock(modification, colour = 'default', damage = 0, speed = 0, scale
 ExistingFire = []
 # Fire Codefunction
 FireAudio = Audio('Audio/Fire.mp3', loop = False, autoplay = False, volume = 0.3)       # Fire audio
+CodeFunctionsAudios.append(FireAudio)
 def FireableFire(modification, colour = 'default', damage = 0, speed = 0, scale = 1, **kwargs):
     if colour != 'default':
         if colour == 'blue':
@@ -146,6 +149,7 @@ def FireableFire(modification, colour = 'default', damage = 0, speed = 0, scale 
 
 ExistingLasers = []
 LaserAudio = Audio('Audio/Laser.mp3', loop = False, autoplay = False, volume = 0.3)     # Laser audio
+CodeFunctionsAudios.append(LaserAudio)
 # Laser codefunction
 def FireableLaser(modification, colour = 'default', damage = 0, scale = 1, **kwargs):
     if colour != 'default':
