@@ -18,3 +18,6 @@ CodeBlocks/1point5.png,, 1.5 |
 CodeBlocks/5.png,, 5 |
 CodeBlocks/10.png,, 10 |
 CodeBlocks/speed.png,,speed|
+CodeBlocks/not.png,, not |
+CodeBlocks/!=.png,, != |
+CodeBlocks/and.png,, and |
